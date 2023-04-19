@@ -8,7 +8,7 @@ from google.protobuf.internal.encoder import _EncodeVarint
 '''
 @init_engin: Drop all the tables and restart
 '''
-
+seqnum = 1
 
 def init_engine():
     # engine = create_engine(
