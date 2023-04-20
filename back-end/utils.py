@@ -24,8 +24,6 @@ def init_engine():
 '''
 @sendMessage: encode data length to send and sendmessage to corrosponding socket
 '''
-
-
 def sendMessage(message, socket):
     msg = message.SerializeToString()
     _EncodeVarint(socket.sendall, len(msg), None)

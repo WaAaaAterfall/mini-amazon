@@ -3,10 +3,10 @@ from utils import *
 from sqlalchemy.orm import query, Session, sessionmaker
 import world_amazon_pb2
 
-# drop all table before start
-Base.metadata.drop_all(engine)
-# create table
-Base.metadata.create_all(engine)
+# # drop all table before start
+# Base.metadata.drop_all(engine)
+# # create table
+# Base.metadata.create_all(engine)
 # global varible
 # two dict that should send to ups and world {seq:ACommands}
 # when handle ups and handle world merge together we need put these two global vaiable in same place and just reference them
@@ -38,6 +38,7 @@ def handlePurchase(APurchaseMore,world_fd,session):
 def handleWorldResponse(world_fd):
     #each thread get one session
     session = Session()
+    session.begin()
     while (True):
         Response = world_amazon_pb2.AResponses()
         # recv message from the world
