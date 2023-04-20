@@ -27,13 +27,13 @@ class Inventory(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     product_id = Column(Integer, ForeignKey('product.id'))
     remain_count = Column(Integer)
-    warehouse_id = Column(Integer, ForeignKey('warehous.id'))
+    warehouse_id = Column(Integer, ForeignKey('warehouse.id'))
 
 
 class Order(Base):
     __tablename__ = 'order'
     package_id = Column(Integer, primary_key=True, autoincrement=False)
-    status = Column(TEXT)
+    status = Column(TEXT) #Delivered, OutForDelivery, Packed, Processing
     truck_id = Column(Integer)
     warehouse_id = Column(Integer, ForeignKey('warehouse.id'))
     addr_x = Column(Integer)
