@@ -41,14 +41,17 @@ def handle_upsConnect(received_connect):
     connect_request.ParseFromString(received_connect)
     if (connect_request.HasField('worldid')):
         # connect to that world
-        worldid =connect_request.worldid
+        worldid = connect_request.worldid
+        return worldid
     else: 
         raise ValueError("The first message should be the request from ups to connect to the same world")
 
 
 def handle_ups(ups_socket):
     received_connect = getMessage(ups_socket)
-    handle_upsConnect(received_connect)
-    AUConnected = generage_AUConnected()
-    sendMessage(ups_socket, AUConnected)
+    print("Amazon received ups connect request: ")
+    worldid = handle_upsConnect(received_connect)
+    print("Connect to worldid: ", worldid)
+    AUConnected = generage_AUConnected(worldid)
+    sendMessage(AUConnected, ups_socket)
 

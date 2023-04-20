@@ -20,10 +20,16 @@ def ups_send_connect():
     print('Connected to', amazon_address)
     request = generate_UTAConnect(1)
     sendMessage(request, ups_socket)
-    print("Request sent")
+    print("Request sent: ", request)
     # receive data from server
     response = getMessage(ups_socket)
-    print('Received data:', response)
+    connected_response = pb2.AUConnected()
+    connected_response.ParseFromString(response)
+    if (connected_response.HasField('worldid')):
+        # connect to that world
+        print("The amazon has connected with world: ", connected_response.worldid)
+    else: 
+        raise ValueError("Amazon does not connenct to the right world")
     # close the connection
     ups_socket.close()
 

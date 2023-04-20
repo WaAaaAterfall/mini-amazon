@@ -29,7 +29,7 @@ class Inventory(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     product_id = Column(Integer, ForeignKey('product.id'))
     remain_count = Column(Integer)
-    warehouse_id = Column(Integer, ForeignKey('warehous.id'))
+    warehouse_id = Column(Integer, ForeignKey('warehouse.id'))
 
 
 class Order(Base):

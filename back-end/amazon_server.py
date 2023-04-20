@@ -15,6 +15,7 @@ def connect_ups(amazon_socket):
             current_ups_socket = socket_list.pop(0)
             # TODO: need to use multiprocessing to handle different ups, write later
             handle_ups(current_ups_socket)
+            ups_socket.close()
 
 # def connect_world():
 #     world_server_address = ('0.0.0.0', 12345)
@@ -31,20 +32,20 @@ def initializer():
 def amazonStart():
     # TODO: pool or multithreading?
    # pool = Pool(PROCESS_NUM, initializer=initializer)
-    init_Engine()
+    init_engine()
     amazon_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     amazon_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
     # bind the socket to ups
     #TODO: What is the port number for ups?
-    amazon_address = ('0,0,0,0', 32345)
+    amazon_address = ('0.0.0.0', 32345)
     print('Server is listening on {}:{}'.format(*amazon_address))
     amazon_socket.bind(amazon_address)
     amazon_socket.listen(100)
     #pool.apply_async(func=connect_ups, args=(amazon_socket,))
     connect_ups(amazon_socket)
     # connect to front-end
-    
+    amazon_socket.close()
 
 if __name__ == '__main__':
     amazonStart()
