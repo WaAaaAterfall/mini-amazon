@@ -23,7 +23,7 @@ class Product(Base):
 
 
 class Inventory(Base):
-    __tablename__ = 'inventory'
+    __tablename__ = 'Inventory'
     id = Column(Integer, primary_key=True, autoincrement=True)
     product_id = Column(Integer, ForeignKey('product.id'))
     remain_count = Column(Integer)
