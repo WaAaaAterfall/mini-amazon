@@ -1,6 +1,7 @@
 from datetime import datetime
 from db_table import *
 import socket
+import world_amazon_pb2
 from google.protobuf.internal.decoder import _DecodeVarint32
 from google.protobuf.internal.encoder import _EncodeVarint
 
@@ -45,3 +46,13 @@ def getMessage(socket):
             break
     whole_message = socket.recv(msg_len)
     return whole_message
+
+
+'''
+@sendACKToWorld: send ack number to the world
+'''
+def sendACKToWorld(socket,ack):
+    command = world_amazon_pb2.ACommands()
+    command.acks.append(ack)
+    command.disconnect = False
+    sendMessage(command,socket)

@@ -7,8 +7,6 @@ from sqlalchemy.orm import sessionmaker
 engine = create_engine(
     'postgresql://postgres:passw0rd@localhost:5432/amazon_568')
 Session = sessionmaker(bind=engine)
-
-
 Base = declarative_base()
 
 class Warehouse(Base):
@@ -25,7 +23,8 @@ class Product(Base):
 
 
 class Inventory(Base):
-    id = Column(Integer, autoincrement=True)
+    __tablename__ = 'inventory'
+    id = Column(Integer, primary_key=True, autoincrement=True)
     product_id = Column(Integer, ForeignKey('product.id'))
     remain_count = Column(Integer)
     warehouse_id = Column(Integer, ForeignKey('warehous.id'))
@@ -41,3 +40,5 @@ class Order(Base):
     addr_y = Column(Integer)
     product_id = Column(Integer, ForeignKey('product.id'))
     time = Column(TIMESTAMP, default=None, nullable=True)
+
+
