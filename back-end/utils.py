@@ -4,12 +4,15 @@ import socket
 import world_amazon_pb2
 from google.protobuf.internal.decoder import _DecodeVarint32
 from google.protobuf.internal.encoder import _EncodeVarint
+import time
 
 
 '''
 @init_engin: Drop all the tables and restart
 '''
 seqnum = 1
+toWorld = {}
+toUps = {}
 
 def init_engine():
     # engine = create_engine(
@@ -54,3 +57,39 @@ def sendACKToWorld(socket,ack):
     command.acks.append(ack)
     command.disconnect = False
     sendMessage(command,socket)
+
+'''
+@addToWorld: add to dict and increment the sequence number
+'''
+def addToWorld(Acommand):
+    toWorld[seqnum] = Acommand
+    seqnum = seqnum + 1
+
+'''
+@addToUps: add to dict and increment the sequence number
+'''
+def addToUps(Acommand):
+    toUps[seqnum] = Acommand
+    seqnum = seqnum + 1
+
+'''
+@sendToworld: keep sending the message in dict toworld to the world
+@warning: dict is not thread safe, we need add thread lock later
+'''
+def sendToWorld(Acommand,world_fd):
+    while(True):
+        time.sleep(1)
+        for key, acommand in toWorld.items():
+            sendMessage(world_fd, acommand)
+
+'''
+@sendToUPS: keep sending the message in dict toUps to the world
+@warning: dict is not thread safe, we need add thread lock later
+'''
+def sendToUPS(Acommand,ups_fd):
+    while(True):
+        time.sleep(1)
+        for key, acommand in toUps.items():
+            sendMessage(ups_fd, acommand)
+
+
