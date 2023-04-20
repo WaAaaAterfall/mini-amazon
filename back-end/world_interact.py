@@ -35,7 +35,7 @@ def handlePurchase(APurchaseMore,world_fd,session):
         session.commit()
 
 # '''
-# @handleReady: send ack, change order status to packed
+# @handleReady: send ack, change order status to packed. check whether ups truck arrived->inform world to load
 # @Arg:   APurchaseMore: data type APurchaseMore  in  world_amazon.proto
 # ''' 
 def handleReady(APacked ,world_fd,session):
@@ -44,7 +44,17 @@ def handleReady(APacked ,world_fd,session):
     sendACKToWorld(world_fd,seqnum)
     # edit order status to packed
     shipid = APacked.shipid 
-    session.query(Order).filter_by(package_id= shipid)
+    session.query(Order).filter_by(package_id= shipid).update({"status" : 'packed'})
+    session.commit()
+    order = session.query(Order).filter_by(package_id= shipid).first()
+    if order.truck_id is not None:
+        # inform the world to load the package
+        # specifically add the acommand to dict
+        Acommand = world_amazon_pb2.ACommands()
+        
+
+
+
 
 
 
