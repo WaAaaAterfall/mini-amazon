@@ -1,8 +1,4 @@
-from db_table import *
-from utils import *
-
-import ups_amazon_pb2 as pb2
-
+from amazon_create_msg import *
 
 '''Handle the commands from UPS'''
 
