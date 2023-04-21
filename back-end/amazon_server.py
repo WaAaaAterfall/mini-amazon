@@ -5,6 +5,16 @@ from multiprocessing import Pool
 from ups_interact import *
 PROCESS_NUM = 3
 
+def handle_ups(ups_socket):
+    # handle the first request from ups: ups and amazon conenct to the same world
+    received_connect = getMessage(ups_socket)
+    print("Amazon received ups connect request: ")
+    worldid = handle_UTAConnect(received_connect)
+    print("Connect to worldid: ", worldid)
+    AUConnected = generage_AUConnected(worldid)
+    sendMessage(AUConnected, ups_socket)
+
+    # Send command message to UPS 
 
 def connect_ups(amazon_socket):
     socket_list = list()
@@ -45,7 +55,7 @@ def amazonStart():
     #pool.apply_async(func=connect_ups, args=(amazon_socket,))
     connect_ups(amazon_socket)
     # connect to front-end
-    amazon_socket.close()
+    #amazon_socket.close()
 
 if __name__ == '__main__':
     amazonStart()
