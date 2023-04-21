@@ -12,7 +12,7 @@ import time
 '''
 
 seqnum = 1
-Word_HostName = ''
+Word_HostName = 'vcm-33444.vm.duke.edu'
 Word_PortNum = 23456
 toWorld = {}
 toUps = {}
@@ -98,7 +98,8 @@ def sendToUPS(Acommand,ups_fd):
 
 def connectWorld(Aconnect):
     world_fd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    world_fd.connect(Word_HostName,Word_PortNum)
+    world_ip = socket.gethostbyname(Word_HostName)
+    world_fd.connect((world_ip,Word_PortNum))
     sendMessage(Aconnect,world_fd)
     Aconnected = world_amazon_pb2.AConnected()
     msg = getMessage(world_fd)
@@ -108,7 +109,7 @@ def connectWorld(Aconnect):
     print(Aconnected.worldid)
     print(Aconnected.result )
     connected = False
-    if Aconnected.result == 'connected':
+    if Aconnected.result == 'connected!':
         connected = True
     return world_fd, connected
 
