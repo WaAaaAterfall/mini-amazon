@@ -10,7 +10,10 @@ import time
 '''
 @init_engin: Drop all the tables and restart
 '''
+
 seqnum = 1
+Word_HostName = ''
+Word_PortNum = 23456
 toWorld = {}
 toUps = {}
 
@@ -81,7 +84,7 @@ def sendToWorld(Acommand,world_fd):
         time.sleep(1)
         for key, acommand in toWorld.items():
             sendMessage(world_fd, acommand)
-
+         
 '''
 @sendToUPS: keep sending the message in dict toUps to the world
 @warning: dict is not thread safe, we need add thread lock later
@@ -91,5 +94,26 @@ def sendToUPS(Acommand,ups_fd):
         time.sleep(1)
         for key, acommand in toUps.items():
             sendMessage(ups_fd, acommand)
+
+
+def connectWorld(Aconnect):
+    world_fd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    world_fd.connect(Word_HostName,Word_PortNum)
+    sendMessage(Aconnect,world_fd)
+    Aconnected = world_amazon_pb2.AConnected()
+    msg = getMessage(world_fd)
+    Aconnected.ParseFromString(msg)
+    #print world id and result
+    #do i need to try catch if result is not connected
+    print(Aconnected.worldid)
+    print(Aconnected.result )
+    connected = False
+    if Aconnected.result == 'connected':
+        connected = True
+    return world_fd, connected
+
+
+
+
 
 

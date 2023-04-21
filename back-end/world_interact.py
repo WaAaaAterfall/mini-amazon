@@ -1,6 +1,7 @@
 from db_table import *
 from utils import *
 from sqlalchemy.orm import query, Session, sessionmaker
+import ups_amazon_pb2
 import world_amazon_pb2
 import google.protobuf
 
@@ -11,8 +12,7 @@ import google.protobuf
 # global varible
 # two dict that should send to ups and world {seq:ACommands}
 # when handle ups and handle world merge together we need put these two global vaiable in same place and just reference them
-toWorld = {}
-toUps = {}
+
 
 # '''
 # @handlePurchase: send ack, edit database to addup the remain count
@@ -36,11 +36,12 @@ def handlePurchase(APurchaseMore,world_fd,session):
 
 # '''
 # @handleReady: send ack, change order status to packed. check whether ups truck arrived->inform world to load
-# @Arg:   APurchaseMore: data type APurchaseMore  in  world_amazon.proto
+# @Arg:   APacked: data type APacked  in  world_amazon.proto
 # ''' 
 def handleReady(APacked ,world_fd,session):
     # firstly send ack to the 
     seqnum = APacked.seqnum 
+
     sendACKToWorld(world_fd,seqnum)
     # edit order status to packed
     shipid = APacked.shipid 
@@ -51,13 +52,47 @@ def handleReady(APacked ,world_fd,session):
         # inform the world to load the package
         # specifically add the acommand to dict
         Acommand = world_amazon_pb2.ACommands()
-        
+        Acommand.disconnect = False
+        load = Acommand.load.add()
+        load.whnum = order.warehouse_id
+        load.truckid = order.truck_id
+        load.shipid = order.package_id
+        load.seqnum = seqnum
+        addToWorld(Acommand)
 
+# '''
+# @handleLoaded: send ack, change order status to loaded. inform ups the package has been loaded
+# @Arg:   APacked: data type APacked  in  world_amazon.proto
+# ''' 
+def handleLoaded(ALoaded,world_fd,session):
+    # firstly send ack to the 
+    seqnum = ALoaded.seqnum 
+    sendACKToWorld(world_fd,seqnum)
+    # edit order status to packed
+    shipid = ALoaded.shipid 
+    session.query(Order).filter_by(package_id= shipid).update({"status" : 'loaded'})
+    session.commit()
+    order = session.query(Order).filter_by(package_id= shipid).first()
+    # inform ups the package has been loaded
+    atuCommand = ups_amazon_pb2.ATUCommands()
+    loaded = atuCommand.loaded.add()
+    loaded.packageid = order.package_id
+    loaded.truckid = order.truck_id
+    loaded.seqnum = seqnum
+    addToUps(atuCommand)
 
-
-
-
-
+# '''
+# @handlePackagestatus: send ack, change order status to according status. 
+# @Arg:   APackage: data type APackage  in  world_amazon.proto
+# ''' 
+def handlePackagestatus(APackage,world_fd,session):
+    # firstly send ack to the 
+    seqnum = APackage.seqnum 
+    sendACKToWorld(world_fd,seqnum)
+    # update order status
+    session.query(Order).filter_by(package_id= APackage.packageid ).update({"status" : APackage.status})
+    session.commit()
+    
 
 
 
@@ -92,9 +127,36 @@ def handleWorldResponse(world_fd):
             handlePurchase(arrive,world_fd,session)
         for ready in Response.ready:
             handleReady(ready,world_fd,session)
+        for loaded in Response.loaded:
+            handleLoaded(loaded,world_fd,session)
+        for packagestatus in Response.packagestatus:
+            handlePackagestatus(packagestatus,world_fd,session)
+        
 
 if __name__ == '__main__':
-   print(google.protobuf.__version__)
+   # without ups, create new world, leave world id blank
+   Aconnect = world_amazon_pb2.AConnect()
+   warehouse_1 = Aconnect.initwh.add()
+   warehouse_1.id = 1
+   warehouse_1.x = 20
+   warehouse_1.y = 20
+   warehouse_2 = Aconnect.initwh.add()
+   warehouse_2.id = 2
+   warehouse_2.x = 40
+   warehouse_2.y = 40
+   Aconnect.isAmazon = True
+   # keep connect to world until it success
+   while(True):
+    wold_fd, Connected = connectWorld(Aconnect)
+    if Connected:
+        break
+    
+
+
+
+   
+
+
 
 
             
