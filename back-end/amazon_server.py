@@ -11,7 +11,7 @@ def handle_ups(ups_socket):
     print("Amazon received ups connect request: ")
     worldid = handle_UTAConnect(received_connect)
     print("Connect to worldid: ", worldid)
-    AUConnected = generage_AUConnected(worldid)
+    AUConnected = create_AUConnected(worldid)
     sendMessage(AUConnected, ups_socket)
 
     # Send command message to UPS 

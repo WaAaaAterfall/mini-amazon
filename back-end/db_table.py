@@ -34,7 +34,7 @@ class Order(Base):
     __tablename__ = 'order'
     package_id = Column(Integer, primary_key=True, autoincrement=False)
     status = Column(TEXT) #Delivered, OutForDelivery, Packed, Processing
-    truck_id = Column(Integer)
+    truck_id = Column(Integer, nullable=True)
     warehouse_id = Column(Integer, ForeignKey('warehouse.id'))
     addr_x = Column(Integer)
     addr_y = Column(Integer)

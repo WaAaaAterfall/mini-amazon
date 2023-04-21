@@ -3,25 +3,8 @@ from utils import *
 
 import ups_amazon_pb2 as pb2
 
-def generage_AUConnected(worldid):
-    AUConnected = pb2.AUConnected()
-    AUConnected.worldid = worldid
-    return AUConnected
 
-def generate_AUErr(error, originseqnum, seqnum):
-    AUErr = pb2.AUErr()
-    AUErr.err = error
-    AUErr.originseqnum = originseqnum
-    AUErr.seqnum = seqnum
-    return AUErr
-
-# def generate_ATULoaded():
-
-# def generate_ATURequestPickup():
-
-
-def generate_ATUCommands():
-    ATUCmd = pb2.AUTCommands()
+'''Handle the commands from UPS'''
 
 def handle_UTADelivered(UTADelivered, session):
     session.begin()
@@ -32,9 +15,33 @@ def handle_UTADelivered(UTADelivered, session):
     delivered_order.status = 'Delivered'
     session.commit()
 
-# def handle_UTACommands(ups_socket):
-#     session = Session()
-#     session.begin()
+def handle_UTAArrived(UTAArrived, session):
+    arrived_seqnum = UTAArrived.seqnum
+    ack_command = create_ackCommand(arrived_seqnum)
+    addToWorld(ack_command)
+
+    package_id = UTAArrived.packageid
+    truck_id = UTAArrived.truckid
+    wh_id = UTAArrived.whid
+    session.begin()
+    order_to_load = session.query(Order).filter_by(Order.packageid == package_id,
+                                                   Order.warehouse_id == wh_id).first()
+    if order_to_load is None:
+        raise ValueError("Cannot find find the order to load")
+    order_to_load.truck_id = truck_id
+    session.commit()
+
+
+
+def handle_UTAOutDelivery(UTAOutDelivery, session):
+
+def handle_AUErr(AUErr, sesison):
+
+def handle_acks(acks):
+
+def handle_UTACommands(ups_socket):
+    session = Session()
+    while
 
 def handle_UTAConnect(received_connect):   
     connect_request = pb2.UTAConnect()
@@ -46,15 +53,4 @@ def handle_UTAConnect(received_connect):
     else: 
         raise ValueError("The first message should be the request from ups to connect to the same world")
 
-
-def handle_ups(ups_socket):
-    # handle the first request from ups: ups and amazon conenct to the same world
-    received_connect = getMessage(ups_socket)
-    print("Amazon received ups connect request: ")
-    worldid = handle_UTAConnect(received_connect)
-    print("Connect to worldid: ", worldid)
-    AUConnected = generage_AUConnected(worldid)
-    sendMessage(AUConnected, ups_socket)
-
-    # Send command message to UPS 
 
