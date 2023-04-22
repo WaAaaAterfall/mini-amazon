@@ -1,11 +1,14 @@
 from db_table import *
 from utils import *
 
-import ups_amazon_pb2 as upb2
-import world_amazon_pb2 as wpb2
 
 '''Create the message that is to send to UPS'''
 
+def create_destionation(x, y):
+    dest = upb2.Desti_loc()
+    dest.x = x
+    dest.y = y
+    return dest
 
 def create_ackCommand(acks):
     ATUCommands = upb2.ATUCommands()
@@ -38,7 +41,7 @@ def create_ATULoaded(package_id, truck_id):
     return ATUCommands
 
 
-def create_ATURequestPickup(product_name, package_id, ups_account, wh_id, destination):
+def create_ATURequestPickup(product_name, package_id, ups_account, wh_id, x, y):
     ATUCommands = upb2.AUTCommands()
     ATURequestPickup = ATUCommands.topickup
     ATURequestPickup.product_name = product_name
@@ -46,6 +49,7 @@ def create_ATURequestPickup(product_name, package_id, ups_account, wh_id, destin
     if ups_account != "":
         ATURequestPickup.ups_account = ups_account
     ATURequestPickup.whid = wh_id
+    destination = create_destionation(x, y)
     ATURequestPickup.destination = destination
     ATURequestPickup.seqnum = seqnum
     return ATUCommands

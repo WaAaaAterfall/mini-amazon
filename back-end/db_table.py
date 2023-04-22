@@ -2,6 +2,7 @@ from sqlalchemy import Integer, Integer, Column, String, ForeignKey, TEXT, TIMES
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
 # engine = create_engine(
 #     'postgresql://postgres:postgres@postgres_db_container:5432/postgres')
 engine = create_engine(

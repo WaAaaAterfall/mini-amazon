@@ -1,4 +1,17 @@
 from amazon_create_msg import *
+'''Connect message'''
+
+def handle_UTAConnect(ups_socket):
+    # handle the first request from ups: ups and amazon conenct to the same world
+    received_connect = getMessage(ups_socket)
+    print("Amazon received ups connect request: ")
+    worldid = handle_UTAConnect(received_connect)
+    return worldid
+
+def send_ATUConnected(worldid, ups_socket):
+    print("Connect to worldid: ", worldid)
+    AUConnected = create_AUConnected(worldid)
+    sendMessage(AUConnected, ups_socket)
 
 '''Handle the commands from UPS'''
 
@@ -64,7 +77,7 @@ def handle_ack(ack):
 
 
 def handle_UTACommands(ups_socket):
-    while (1):
+    while (False):
         UTACmd = upb2.UTACommands()
         # recv message from the world
         msg = getMessage(ups_socket)
@@ -86,8 +99,9 @@ def handle_UTACommands(ups_socket):
             handle_UTADelivered(delivered, Session)
 
 
-def handle_UTAConnect(received_connect):   
+def handle_UTAConnect(ups_socket):   
     connect_request = upb2.UTAConnect()
+    received_connect = getMessage(ups_socket)
     connect_request.ParseFromString(received_connect)
     if (connect_request.HasField('worldid')):
         # connect to that world
