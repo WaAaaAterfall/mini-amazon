@@ -1,10 +1,12 @@
-from datetime import datetime
 from db_table import *
 import socket
-import world_amazon_pb2
+import world_amazon_pb2 as wpb2
 from google.protobuf.internal.decoder import _DecodeVarint32
 from google.protobuf.internal.encoder import _EncodeVarint
 import time
+
+import ups_amazon_pb2 as upb2
+import world_amazon_pb2 as wpb2
 
 
 '''
@@ -12,7 +14,7 @@ import time
 '''
 
 seqnum = 1
-Word_HostName = 'vcm-33444.vm.duke.edu'
+Word_HostName = 'localhost'
 Word_PortNum = 23456
 toWorld = {}
 toUps = {}
@@ -56,7 +58,7 @@ def getMessage(socket):
 @sendACKToWorld: send ack number to the world
 '''
 def sendACKToWorld(socket,ack):
-    command = world_amazon_pb2.ACommands()
+    command = wpb2.ACommands()
     command.acks.append(ack)
     command.disconnect = False
     sendMessage(command,socket)
@@ -94,27 +96,5 @@ def sendToUPS(Acommand,ups_fd):
         time.sleep(1)
         for key, acommand in toUps.items():
             sendMessage(ups_fd, acommand)
-
-
-def connectWorld(Aconnect):
-    world_fd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    world_ip = socket.gethostbyname(Word_HostName)
-    world_fd.connect((world_ip,Word_PortNum))
-    sendMessage(Aconnect,world_fd)
-    Aconnected = world_amazon_pb2.AConnected()
-    msg = getMessage(world_fd)
-    Aconnected.ParseFromString(msg)
-    #print world id and result
-    #do i need to try catch if result is not connected
-    print(Aconnected.worldid)
-    print(Aconnected.result )
-    connected = False
-    if Aconnected.result == 'connected!':
-        connected = True
-    return world_fd, connected
-
-
-
-
 
 

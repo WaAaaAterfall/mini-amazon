@@ -1,61 +1,57 @@
-import socket
-from utils import *
-from multiprocessing import Pool
-#from world_interact import *
 from ups_interact import *
-PROCESS_NUM = 3
+from world_interact import *
+import threading
 
-def handle_ups(ups_socket):
-    # handle the first request from ups: ups and amazon conenct to the same world
-    received_connect = getMessage(ups_socket)
-    print("Amazon received ups connect request: ")
-    worldid = handle_UTAConnect(received_connect)
-    print("Connect to worldid: ", worldid)
-    AUConnected = create_AUConnected(worldid)
-    sendMessage(AUConnected, ups_socket)
-
-    # Send command message to UPS 
-
-def connect_ups(amazon_socket):
-    socket_list = list()
+def connect_ups_world(amazon_socket):
     while(1):
         ups_socket, addr = amazon_socket.accept()
-        socket_list.append(ups_socket)
-        if len(socket_list) > 0:
-            current_ups_socket = socket_list.pop(0)
-            # TODO: need to use multiprocessing to handle different ups, write later
-            handle_ups(current_ups_socket)
-            ups_socket.close()
-
-# def connect_world():
-#     world_server_address = ('0.0.0.0', 12345)
-#     amazon_socket.connect(world_server_address)
-#     print('Connected to', world_server_address)
-#     handle_world_request()
-
-def initializer():
-    """ensure the parent proc's database connections are not touched
-    in the new connection pool"""
-    engine.dispose(close=False)
-
+        worldid = handle_UTAConnect(ups_socket)
+        print("Create a thread to handle ups command")
+        thread_handle_ups = threading.Thread(target = handle_UTACommands, args =(ups_socket,))
+        thread_handle_ups.start()
+        # keep connect to world until it success
+        world_fd = 0
+        while (True):
+            fd, Connected, world_id_received = connectWorld(worldid)
+            world_fd = fd
+            if Connected:
+                #listen on world
+                print("Create a thread to handle world command")
+                thread_handle_world = threading.Thread(target = handleWorldResponse, args =(world_fd))
+                thread_handle_world.start()
+                break
+        if world_id_received != worldid:
+            raise ValueError("The connect world id is not the world ups required for")
+    
+        send_ATUConnected(world_id_received, ups_socket)
+        #listen on ups
+        break
+    thread_handle_world.join()
+    thread_handle_ups.join()
+    ups_socket.close()
+    world_fd.close()      
 
 def amazonStart():
-    # TODO: pool or multithreading?
-   # pool = Pool(PROCESS_NUM, initializer=initializer)
-    init_engine()
-    amazon_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    amazon_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    try:
+        # TODO: pool or multithreading?
+        init_engine()
+        amazon_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        amazon_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-    # bind the socket to ups
-    #TODO: What is the port number for ups?
-    amazon_address = ('0.0.0.0', 32345)
-    print('Server is listening on {}:{}'.format(*amazon_address))
-    amazon_socket.bind(amazon_address)
-    amazon_socket.listen(100)
-    #pool.apply_async(func=connect_ups, args=(amazon_socket,))
-    connect_ups(amazon_socket)
-    # connect to front-end
-    #amazon_socket.close()
+        # bind the socket to ups
+        amazon_address = ('0.0.0.0', 32345)
+        print('Server is listening on {}:{}'.format(*amazon_address))
+        amazon_socket.bind(amazon_address)
+        amazon_socket.listen(100)
+        connect_ups_world(amazon_socket)
+
+        # connect to front-end
+
+
+        amazon_socket.close()
+    except ValueError as err:
+        print("Raise error: ", err.args)
+
 
 if __name__ == '__main__':
     amazonStart()

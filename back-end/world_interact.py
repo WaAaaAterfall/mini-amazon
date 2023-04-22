@@ -100,8 +100,8 @@ def handleWorldResponse(world_fd):
     # each thread get one session
     session = Session()
     session.begin()
-    while (True):
-        Response = world_amazon_pb2.AResponses()
+    while (False):
+        Response = wpb2.AResponses()
         # recv message from the world
         msg = getMessage(world_fd)
         Response.ParseFromString(msg)
@@ -129,6 +129,51 @@ def handleWorldResponse(world_fd):
             handleLoaded(loaded, world_fd, session)
         for packagestatus in Response.packagestatus:
             handlePackagestatus(packagestatus, world_fd, session)
+
+def connectWorld(worldid = None):
+    #generate Aconncet
+    Aconnect = wpb2.AConnect()
+    # Create an empty dictionary to store warehouse information
+    warehouse_dict = {}
+    # Add a warehouse to the dictionary
+    warehouse_dict[1] = {'x': 20, 'y': 20}
+    warehouse_dict[2] = {'x': 300, 'y': 300}
+    # Iterate over the dictionary of warehouse information
+    for warehouse_id, warehouse_info in warehouse_dict.items():
+        # Create a new warehouse object and set its properties
+        warehouse = Aconnect.initwh.add()
+        warehouse.id = warehouse_id
+        warehouse.x = warehouse_info['x']
+        warehouse.y = warehouse_info['y']
+
+    Aconnect.isAmazon = True
+    if(worldid != None):
+        Aconnect.worldid = worldid
+    print("World initialization over")
+    world_fd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    world_ip = socket.gethostbyname(Word_HostName)
+    world_fd.connect((world_ip,Word_PortNum))
+    sendMessage(Aconnect,world_fd)
+    print("AConnect sent")
+    Aconnected = wpb2.AConnected()
+    msg = getMessage(world_fd)
+    Aconnected.ParseFromString(msg)
+    #print world id and result
+    #do i need to try catch if result is not connected
+    world_id = Aconnected.worldid
+    print(Aconnected.result)
+    connected = False
+    if Aconnected.result == 'connected!':
+        connected = True
+
+    session = Session()
+    session.begin()
+    for warehouse_id, warehouse_info in warehouse_dict.items():
+        New_Warehose = Warehouse(id = warehouse_id, x = warehouse_info['x'], y = warehouse_info['y'])
+        session.add(New_Warehose)
+        session.commit()
+    session.close()
+    return world_fd, connected, world_id
 
 
 if __name__ == '__main__':
