@@ -1,5 +1,6 @@
 from ups_interact import *
 from world_interact import *
+from web_interact import *
 import threading
 
 def connect_ups_world(atu_socket, ups_address):
@@ -28,6 +29,7 @@ def connect_ups_world(atu_socket, ups_address):
         if world_id_received != worldid:
             raise ValueError("The connect world id is not the world ups required for")
         send_ATUConnected(world_id_received, atu_socket)
+        print('Connected to', ups_address)
         break
 
     thread_send_ups = threading.Thread(target = sendToUPS, args =(atu_socket,))
@@ -40,8 +42,31 @@ def connect_ups_world(atu_socket, ups_address):
     thread_send_world.join()
     thread_send_ups.join()
 
-    atu_socket.close()
     world_fd.close()      
+
+def accept_web(amazon_socket, amazon_address):
+    print('Server is listening on {}:{}'.format(*amazon_address))
+    amazon_socket.bind(amazon_address)
+    amazon_socket.listen(100)
+    web_socket, addr = amazon_socket.accept()
+    return web_socket
+
+
+def process_order(web_fd,session):
+    while(True):
+        msg = web_fd.recv(1024)
+        id = msg.decode()
+        if not msg:
+            continue
+        session.begin()
+        order = session.query(Order).filter_by(package_id=id).first()
+        nearst_whid = findWarehouse(order.addr_x, order.addr_y,session)
+        # update order to inclue warehouse id
+        order.warehouse_id = nearst_whid
+        if check_inventory_availability(order.warehouse_id, order.product_id, order.count) == False:
+            
+        session.commit()
+        
 
 def amazonStart():
     #Port for world: connect to 23456
@@ -52,20 +77,21 @@ def amazonStart():
         init_engine()
         amazon_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         amazon_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        amazon_address = ('0.0.0.0', 54321)
         # connect to front-end
-        # amazon_address = ('0.0.0.0', 32345)
-        # print('Server is listening on {}:{}'.format(*amazon_address))
-        # amazon_socket.bind(amazon_address)
-        # amazon_socket.listen(100)
-        #connect_web(amazon_socket)
+        web_socket = accept_web(amazon_socket, amazon_address)
+        thread_handle_web = threading.Thread(target = handle_web_query, args =(web_socket,))
+        thread_handle_web.start()
 
         # connect to ups
         atu_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         atu_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         ups_address = ('0.0.0.0', 32345)
         connect_ups_world(atu_socket, ups_address)
-        print('Connected to', ups_address)
 
+        thread_handle_web.join()
+
+        atu_socket.close()
         amazon_socket.close()
     except ValueError as err:
         print("Raise error: ", err.args)

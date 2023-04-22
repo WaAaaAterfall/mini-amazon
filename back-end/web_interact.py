@@ -1,12 +1,26 @@
 from db_table import *
 from utils import *
 from db_connect import *
+from amazon_create_msg import *
 PORT = 13145
 
 # '''
 # @findWarehouse: given the order address x,y find the nearst warehouse and update order warehouse
 # @Return:   the neareast warehouse id
 # ''' 
+
+def inventory_available(warehouse_id, product_id, request_count):
+    session = Session()
+    request_inventory = session.query(Inventory).filter_by(Inventory.warehouse_id == warehouse_id,
+                                                           Inventory.product_id == product_id)
+    total_count = 0
+    for inventory in request_inventory:
+        total_count += inventory.remain_count
+    if request_count <= total_count:
+        return True
+    else:
+        return False
+
 def findWarehouse(addr_x, addr_y,session):
     min_distance = float('inf')
     # iterate all warehouse
@@ -22,9 +36,7 @@ def findWarehouse(addr_x, addr_y,session):
     return nearst_whid
 
 
-
-
-def handle_web(web_fd,session):
+def handle_web_query(web_fd,session):
     while(True):
         msg = web_fd.recv(1024)
         data = msg.decode()
@@ -44,7 +56,7 @@ if __name__ == '__main__':
     sock.listen(100)
     web_fd, addr = sock.accept()
     session = getSession(engine)
-    handle_web(web_fd,session)
+    handle_web_query(web_fd,session)
 
 
 
