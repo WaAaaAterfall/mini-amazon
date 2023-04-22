@@ -1,16 +1,9 @@
 from db_table import *
 from utils import *
-from db_connect import *
+#from db_connect import *
 from sqlalchemy.orm import query, Session, sessionmaker
 
 from amazon_create_msg import *
-
-
-
-# global varible
-# two dict that should send to ups and world {seq:ACommands}
-# when handle ups and handle world merge together we need put these two global vaiable in same place and just reference them
-
 
 # '''
 # @handlePurchase: send ack, edit database to addup the remain count
@@ -61,7 +54,6 @@ def handleReady(APacked, world_fd, session):
 # @Arg:   APacked: data type APacked  in  world_amazon.proto
 # '''
 
-
 def handleLoaded(ALoaded, world_fd, session):
     # firstly send ack to the
     seqnum = ALoaded.seqnum
@@ -100,7 +92,7 @@ def handleWorldResponse(world_fd):
     # each thread get one session
     session = Session()
     session.begin()
-    while (False):
+    while (True):
         Response = wpb2.AResponses()
         # recv message from the world
         msg = getMessage(world_fd)
@@ -130,14 +122,9 @@ def handleWorldResponse(world_fd):
         for packagestatus in Response.packagestatus:
             handlePackagestatus(packagestatus, world_fd, session)
 
-def connectWorld(worldid = None):
+def connectWorld(warehouse_dict, worldid = None):
     #generate Aconncet
     Aconnect = wpb2.AConnect()
-    # Create an empty dictionary to store warehouse information
-    warehouse_dict = {}
-    # Add a warehouse to the dictionary
-    warehouse_dict[1] = {'x': 20, 'y': 20}
-    warehouse_dict[2] = {'x': 300, 'y': 300}
     # Iterate over the dictionary of warehouse information
     for warehouse_id, warehouse_info in warehouse_dict.items():
         # Create a new warehouse object and set its properties
@@ -145,7 +132,6 @@ def connectWorld(worldid = None):
         warehouse.id = warehouse_id
         warehouse.x = warehouse_info['x']
         warehouse.y = warehouse_info['y']
-
     Aconnect.isAmazon = True
     if(worldid != None):
         Aconnect.worldid = worldid
@@ -165,51 +151,12 @@ def connectWorld(worldid = None):
     connected = False
     if Aconnected.result == 'connected!':
         connected = True
+        session = Session()
+        session.begin()
+        for warehouse_id, warehouse_info in warehouse_dict.items():
+            New_Warehose = Warehouse(id = warehouse_id, x = warehouse_info['x'], y = warehouse_info['y'])
+            session.add(New_Warehose)
+            session.commit()
+        session.close()
 
-    session = Session()
-    session.begin()
-    for warehouse_id, warehouse_info in warehouse_dict.items():
-        New_Warehose = Warehouse(id = warehouse_id, x = warehouse_info['x'], y = warehouse_info['y'])
-        session.add(New_Warehose)
-        session.commit()
-    session.close()
     return world_fd, connected, world_id
-
-
-if __name__ == '__main__':
-    # before start drop all db and creat all table
-    engine = init_engine()
-    # without ups, create new world, leave world id blank
-    Aconnect = wpb2.AConnect()
-    # Create an empty dictionary to store warehouse information
-    warehouse_dict = {}
-
-   # Add a warehouse to the dictionary
-    warehouse_dict[1] = {'x': 20, 'y': 20}
-    warehouse_dict[2] = {'x': 300, 'y': 300}
-    # Iterate over the dictionary of warehouse information
-    for warehouse_id, warehouse_info in warehouse_dict.items():
-        # Create a new warehouse object and set its properties
-        warehouse = Aconnect.initwh.add()
-        warehouse.id = warehouse_id
-        warehouse.x = warehouse_info['x']
-        warehouse.y = warehouse_info['y']
-
-    Aconnect.isAmazon = True
-    # keep connect to world until it success
-    wold_fd = 0
-    while (True):
-        fd, Connected = connectWorld(Aconnect)
-        wold_fd = fd
-        if Connected:
-            break
-    # update database to put warehouse in
-    session = getSession(engine)
-    for warehouse_id, warehouse_info in warehouse_dict.items():
-        New_Warehose = Warehouse(id = warehouse_id, x = warehouse_info['x'], y = warehouse_info['y'])
-        session.add(New_Warehose)
-        session.commit()
-    session.close()
-
-
-

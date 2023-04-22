@@ -15,14 +15,16 @@ def ups_send_connect():
     ups_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
     # connect the socket to a specific address and port
-    amazon_address = ('localhost', 32345)
-    ups_socket.connect(amazon_address)
-    print('Connected to', amazon_address)
+    ups_address = ('localhost', 32345)
+    print('Server is listening on {}:{}'.format(*ups_address))
+    ups_socket.bind(ups_address)
+    ups_socket.listen(100)
+    amazon_socket, addr = ups_socket.accept()
     request = generate_UTAConnect(1)
-    sendMessage(request, ups_socket)
+    sendMessage(request, amazon_socket)
     print("Request sent to amazon: ", request)
     # receive data from server
-    response = getMessage(ups_socket)
+    response = getMessage(amazon_socket)
     connected_response = upb2.AUConnected()
     connected_response.ParseFromString(response)
     if (connected_response.HasField('worldid')):

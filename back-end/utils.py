@@ -53,16 +53,6 @@ def getMessage(socket):
     whole_message = socket.recv(msg_len)
     return whole_message
 
-
-'''
-@sendACKToWorld: send ack number to the world
-'''
-def sendACKToWorld(socket,ack):
-    command = wpb2.ACommands()
-    command.acks.append(ack)
-    command.disconnect = False
-    sendMessage(command,socket)
-
 '''
 @addToWorld: add to dict and increment the sequence number
 '''
@@ -81,7 +71,7 @@ def addToUps(Acommand):
 @sendToworld: keep sending the message in dict toworld to the world
 @warning: dict is not thread safe, we need add thread lock later
 '''
-def sendToWorld(Acommand,world_fd):
+def sendToWorld(world_fd):
     while(True):
         time.sleep(1)
         for key, acommand in toWorld.items():
@@ -91,7 +81,7 @@ def sendToWorld(Acommand,world_fd):
 @sendToUPS: keep sending the message in dict toUps to the world
 @warning: dict is not thread safe, we need add thread lock later
 '''
-def sendToUPS(Acommand,ups_fd):
+def sendToUPS(ups_fd):
     while(True):
         time.sleep(1)
         for key, acommand in toUps.items():

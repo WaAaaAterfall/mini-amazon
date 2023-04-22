@@ -1,25 +1,31 @@
 from amazon_create_msg import *
-'''Connect message'''
 
-def handle_UTAConnect(ups_socket):
-    # handle the first request from ups: ups and amazon conenct to the same world
-    received_connect = getMessage(ups_socket)
-    print("Amazon received ups connect request: ")
-    worldid = handle_UTAConnect(received_connect)
-    return worldid
+
+'''Connect message'''
 
 def send_ATUConnected(worldid, ups_socket):
     print("Connect to worldid: ", worldid)
     AUConnected = create_AUConnected(worldid)
     sendMessage(AUConnected, ups_socket)
 
+def handle_UTAConnect(ups_socket):   
+    connect_request = upb2.UTAConnect()
+    received_connect = getMessage(ups_socket)
+    connect_request.ParseFromString(received_connect)
+    if (connect_request.HasField('worldid')):
+        # connect to that world
+        worldid = connect_request.worldid
+        return worldid
+    else: 
+        raise ValueError("The first message should be the request from ups to connect to the same world")
+
+
 '''Handle the commands from UPS'''
 
-def handle_UTAArrived(UTAArrived, Session):
+def handle_UTAArrived(UTAArrived, Session, ups_socket):
     session = Session()
     arrived_seqnum = UTAArrived.seqnum
-    ack_command = create_ackCommand(arrived_seqnum)
-    addToUps(ack_command)
+    send_ackCommand(arrived_seqnum, ups_socket)
 
     package_id = UTAArrived.packageid
     truck_id = UTAArrived.truckid
@@ -36,11 +42,10 @@ def handle_UTAArrived(UTAArrived, Session):
         Acommand = create_ATWToload(order_to_load.warehouse_id, order_to_load.truck_id, order_to_load.package_id)
         addToWorld(Acommand)
 
-def handle_UTAOutDelivery(UTAOutDelivery, Session):
+def handle_UTAOutDelivery(UTAOutDelivery, Session, ups_socket):
     session = Session()
     out_del_seqnum = UTAOutDelivery.seqnum
-    ack_command = create_ackCommand(out_del_seqnum)
-    addToUps(ack_command)
+    send_ackCommand(out_del_seqnum, ups_socket)
 
     package_id = UTAOutDelivery.packageid
     session.begin()
@@ -50,7 +55,9 @@ def handle_UTAOutDelivery(UTAOutDelivery, Session):
     order_to_deliver.status = 'OutForDelivery'
     session.commit()
 
-def handle_UTADelivered(UTADelivered, Session):
+def handle_UTADelivered(UTADelivered, Session, ups_socket):
+    delivered_seqnum = UTADelivered.seqnum
+    send_ackCommand(delivered_seqnum, ups_socket)
     session = Session()
     session.begin()
     package_id = UTADelivered.package_id
@@ -60,10 +67,9 @@ def handle_UTADelivered(UTADelivered, Session):
     delivered_order.status = 'Delivered'
     session.commit()
 
-def handle_AUErr(AUErr, Sesison):
+def handle_AUErr(AUErr, ups_socket):
     err_seqnum = AUErr.seqnum
-    ack_command = create_ackCommand(err_seqnum)
-    addToUps(ack_command)
+    send_ackCommand(err_seqnum, ups_socket)
 
     err_message = AUErr.err
     originseqnum = AUErr.originseqnum
@@ -77,37 +83,26 @@ def handle_ack(ack):
 
 
 def handle_UTACommands(ups_socket):
-    while (False):
+    while (True):
         UTACmd = upb2.UTACommands()
         # recv message from the world
         msg = getMessage(ups_socket)
         UTACmd.ParseFromString(msg)
         for err in UTACmd:
-            handle_AUErr(err, Session)
+            handle_AUErr(err, ups_socket)
 
         for ack in UTACmd.acks:
             # check if ack in toWorld key and remove from to send
             handle_ack(ack)
         
         for arrive in UTACmd.arrive:
-            handle_UTAArrived(arrive, Session)
+            handle_UTAArrived(arrive, Session, ups_socket)
         
         for to_deliver in UTACmd.todeliver:
-            handle_UTAOutDelivery(to_deliver, Session)
+            handle_UTAOutDelivery(to_deliver, Session, ups_socket)
 
         for delivered in UTACmd.delivered:
-            handle_UTADelivered(delivered, Session)
+            handle_UTADelivered(delivered, Session, ups_socket)
 
-
-def handle_UTAConnect(ups_socket):   
-    connect_request = upb2.UTAConnect()
-    received_connect = getMessage(ups_socket)
-    connect_request.ParseFromString(received_connect)
-    if (connect_request.HasField('worldid')):
-        # connect to that world
-        worldid = connect_request.worldid
-        return worldid
-    else: 
-        raise ValueError("The first message should be the request from ups to connect to the same world")
 
 

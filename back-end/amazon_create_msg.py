@@ -10,11 +10,10 @@ def create_destionation(x, y):
     dest.y = y
     return dest
 
-def create_ackCommand(acks):
+def send_ackCommand(ack, atu_socket):
     ATUCommands = upb2.ATUCommands()
-    for ack in acks:
-        ATUCommands.acks.append(ack)
-    return ATUCommands
+    ATUCommands.acks.append(ack)
+    sendMessage(ATUCommands, atu_socket)
 
 
 def create_AUConnected(worldid):
@@ -75,3 +74,13 @@ def create_ATWToload(warehouse_id, truck_id, package_id):
     load.shipid = package_id
     load.seqnum = seqnum
     return Acommand
+
+
+'''
+@sendACKToWorld: send ack number to the world
+'''
+def sendACKToWorld(socket,ack):
+    command = wpb2.ACommands()
+    command.acks.append(ack)
+    command.disconnect = False
+    sendMessage(command,socket)
