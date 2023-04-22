@@ -75,7 +75,6 @@ def create_ATWToload(warehouse_id, truck_id, package_id):
     load.seqnum = seqnum
     return Acommand
 
-
 '''
 @sendACKToWorld: send ack number to the world
 '''
@@ -84,3 +83,46 @@ def sendACKToWorld(socket,ack):
     command.acks.append(ack)
     command.disconnect = False
     sendMessage(command,socket)
+
+'''
+@arg: things: a list of data type <AProduct>
+'''
+def create_ATWPurchase(warehouse_id, things):
+    Acommand = wpb2.ACommands()
+    Acommand.disconnect = False
+    buy = Acommand.buy.add()
+    buy.whnum = warehouse_id
+    buy.seqnum = seqnum
+    for thing in things:
+        athing=buy.things.add()
+        athing.id = thing.id
+        athing.description = thing.description 
+        athing.count = thing.count
+    
+    return Acommand
+
+def create_ATWToPack(warehouse_id, things, package_id ):
+    Acommand = wpb2.ACommands()
+    Acommand.disconnect = False
+    topack = Acommand.topack.add()
+    topack.whnum = warehouse_id
+    topack.seqnum = seqnum
+    topack.shipid  = package_id
+    for thing in things:
+        athing = topack.things.add()
+        athing.id = thing.id
+        athing.description = thing.description 
+        athing.count = thing.count
+    return Acommand
+
+def create_ATWQuery(package_id):
+    Acommand = wpb2.ACommands()
+    Acommand.disconnect = False
+    toquery = Acommand.queries.add()
+    toquery.packageid = package_id
+    toquery.seqnum = seqnum
+    return Acommand
+
+
+
+
