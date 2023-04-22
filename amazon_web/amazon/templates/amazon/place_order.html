@@ -1,0 +1,18 @@
+<!-- orders/templates/orders/place_order.html -->
+<h1>Place Order</h1>
+<form method="post">
+  {% csrf_token %}
+  <label for="package_id">Package ID:</label>
+  <input type="text" name="package_id"><br>
+  <label for="status">Status:</label>
+  <input type="text" name="status"><br>
+  <label for="truck_id">Truck ID:</label>
+  <input type="text" name="truck_id"><br>
+  <label for="warehouse_id">Warehouse ID:</label>
+  <input type="text" name="warehouse_id"><br>
+  <label for="addr_x">Address X:</label>
+  <input type="text" name="addr_x"><br>
+  <label for="addr_y">Address Y:</label>
+  <input type="text" name="addr_y"><br>
+  <label for="product_id">Product ID:</label>
+  <input type="text" name="product_id"><br>
