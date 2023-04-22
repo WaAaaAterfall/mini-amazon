@@ -2,9 +2,7 @@ from db_table import *
 from utils import *
 from db_connect import *
 from sqlalchemy.orm import query, Session, sessionmaker
-import ups_amazon_pb2
-import world_amazon_pb2
-import google.protobuf
+
 from amazon_create_msg import *
 
 
@@ -45,6 +43,7 @@ def handleReady(APacked, world_fd, session):
     seqnum = APacked.seqnum
 
     sendACKToWorld(world_fd, seqnum)
+    session.begin()
     # edit order status to packed
     shipid = APacked.shipid
     session.query(Order).filter_by(
@@ -55,12 +54,6 @@ def handleReady(APacked, world_fd, session):
         # inform the world to load the package
         # specifically add the acommand to dict
         Acommand = create_ATWToload(order.warehouse_id, order.truck_id, order.package_id)
-        # Acommand.disconnect = False
-        # load = Acommand.load.add()
-        # load.whnum = order.warehouse_id
-        # load.truckid = order.truck_id
-        # load.shipid = order.package_id
-        # load.seqnum = seqnum
         addToWorld(Acommand)
 
 # '''
@@ -142,7 +135,7 @@ if __name__ == '__main__':
     # before start drop all db and creat all table
     engine = init_engine()
     # without ups, create new world, leave world id blank
-    Aconnect = world_amazon_pb2.AConnect()
+    Aconnect = wpb2.AConnect()
     # Create an empty dictionary to store warehouse information
     warehouse_dict = {}
 

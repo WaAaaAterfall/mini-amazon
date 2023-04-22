@@ -60,6 +60,8 @@ def create_ATULoad(package_id, truck_id):
     return atuCommand
 
 
+'''Create message to World'''
+
 def create_ATWToload(warehouse_id, truck_id, package_id):
     Acommand = wpb2.ACommands()
     Acommand.disconnect = False
