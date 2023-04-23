@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, Integer, Column, String, ForeignKey, TEXT, TIMESTAMP
+from sqlalchemy import Integer, Integer, Column, ForeignKey, TEXT, TIMESTAMP
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -13,6 +13,7 @@ Base = declarative_base()
 class Warehouse(Base):
     __tablename__ = 'warehouse'
     id = Column(Integer, primary_key=True, autoincrement=False)
+    world_id = Column(Integer, autoincrement=False)
     x = Column(Integer)
     y = Column(Integer)
 
@@ -41,6 +42,6 @@ class Order(Base):
     addr_x = Column(Integer)
     addr_y = Column(Integer)
     product_id = Column(Integer, ForeignKey('product.id'))
-    time = Column(TIMESTAMP, default=None, nullable=True)
+    #time = Column(TIMESTAMP, default=None, nullable=True)
 
 

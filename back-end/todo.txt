@@ -1,0 +1,10 @@
+2. ack sending?
+-----3. multiple products in one order. Solved, not necessary
+--4. Multiple order in one truck. Partially done but leave me alone
+5. get and send ups account name
+6. unit test for ups
+7. integration test
+1. try catch block design
+-----8. threadblock for seqnum adding？Done, hopefully
+-----9. everytime program raise an error when handling command from world or ups, /
+        also send a Error message to them ？should I?

@@ -1,16 +1,20 @@
 from db_table import *
 from utils import *
 #from db_connect import *
-from sqlalchemy.orm import query, Session, sessionmaker
 
 from amazon_create_msg import *
+
+WORLD_HOSTNAME = 'localhost'
+WORLD_PORTNUM = 23456
+
 
 # '''
 # @handlePurchase: send ack, edit database to addup the remain count
 # @Arg:   APurchaseMore: data type APurchaseMore  in  world_amazon.proto
 # '''
-
-def handlePurchase(APurchaseMore, world_fd, session):
+def handlePurchase(APurchaseMore, world_fd):
+    session = Session()
+    session.begin()
     # firstly send ack to the world
     seqnum = APurchaseMore.seqnum
     sendACKToWorld(world_fd, seqnum)
@@ -24,17 +28,17 @@ def handlePurchase(APurchaseMore, world_fd, session):
         session.query(Inventory).filter_by(product_id=pd_id, warehouse_id=wh_id)\
             .update({"amount": Inventory.remain_count + product_count})
         session.commit()
+    session.close()
+
 
 # '''
 # @handleReady: send ack, change order status to packed. check whether ups truck arrived->inform world to load
 # @Arg:   APacked: data type APacked  in  world_amazon.proto
 # '''
-
-
-def handleReady(APacked, world_fd, session):
+def handleReady(APacked, world_fd):
+    session = Session()
     # firstly send ack to the
     seqnum = APacked.seqnum
-
     sendACKToWorld(world_fd, seqnum)
     session.begin()
     # edit order status to packed
@@ -42,19 +46,23 @@ def handleReady(APacked, world_fd, session):
     session.query(Order).filter_by(
         package_id=shipid).update({"status": 'packed'})
     session.commit()
-    order = session.query(Order).filter_by(package_id=shipid).first()
-    if order.truck_id is not None:
-        # inform the world to load the package
-        # specifically add the acommand to dict
-        Acommand = create_ATWToload(order.warehouse_id, order.truck_id, order.package_id)
-        addToWorld(Acommand)
+    session.close()
+    # order = session.query(Order).filter_by(package_id=shipid).first()
+    # if order.truck_id is not None:
+    #     # inform the world to load the package
+    #     # specifically add the acommand to dict
+    #     Acommand = create_ATWToload(order.warehouse_id, order.truck_id, order.package_id)
+    #     addToWorld(Acommand)
+
+
 
 # '''
 # @handleLoaded: send ack, change order status to loaded. inform ups the package has been loaded
 # @Arg:   APacked: data type APacked  in  world_amazon.proto
 # '''
-
-def handleLoaded(ALoaded, world_fd, session):
+def handleLoaded(ALoaded, world_fd):
+    session = Session()
+    session.begin()
     # firstly send ack to the
     seqnum = ALoaded.seqnum
     sendACKToWorld(world_fd, seqnum)
@@ -64,21 +72,20 @@ def handleLoaded(ALoaded, world_fd, session):
         package_id=shipid).update({"status": 'loaded'})
     session.commit()
     order = session.query(Order).filter_by(package_id=shipid).first()
+    #TODO: CHANGE HERE!
     # inform ups the package has been loaded
-    atuCommand = create_ATULoad(order.package_id,order.truck_id)
-    # loaded = atuCommand.loaded.add()
-    # loaded.packageid = order.package_id
-    # loaded.truckid = order.truck_id
-    # loaded.seqnum = seqnum
+    atuCommand = create_ATULoaded(order.package_id,order.truck_id)
     addToUps(atuCommand)
+    session.close()
+
 
 # '''
 # @handlePackagestatus: send ack, change order status to according status.
 # @Arg:   APackage: data type APackage  in  world_amazon.proto
 # '''
-
-
-def handlePackagestatus(APackage, world_fd, session):
+def handlePackagestatus(APackage, world_fd):
+    session = Session()
+    session.begin()
     # firstly send ack to the
     seqnum = APackage.seqnum
     sendACKToWorld(world_fd, seqnum)
@@ -86,12 +93,11 @@ def handlePackagestatus(APackage, world_fd, session):
     session.query(Order).filter_by(package_id=APackage.packageid).update(
         {"status": APackage.status})
     session.commit()
+    session.close()
 
 
 def handleWorldResponse(world_fd):
     # each thread get one session
-    session = Session()
-    session.begin()
     while (True):
         Response = wpb2.AResponses()
         # recv message from the world
@@ -114,13 +120,14 @@ def handleWorldResponse(world_fd):
         # now we need to handle purchase, pack, load
         # in each section, we need to send ack to the world to avoid the world send the response multiply times
         for arrive in Response.arrived:
-            handlePurchase(arrive, world_fd, session)
+            handlePurchase(arrive, world_fd)
         for ready in Response.ready:
-            handleReady(ready, world_fd, session)
+            handleReady(ready, world_fd)
         for loaded in Response.loaded:
-            handleLoaded(loaded, world_fd, session)
+            handleLoaded(loaded, world_fd)
         for packagestatus in Response.packagestatus:
-            handlePackagestatus(packagestatus, world_fd, session)
+            handlePackagestatus(packagestatus, world_fd)
+
 
 def connectWorld(warehouse_dict, worldid = None):
     #generate Aconncet
@@ -137,8 +144,8 @@ def connectWorld(warehouse_dict, worldid = None):
         Aconnect.worldid = worldid
     print("World initialization over")
     world_fd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    world_ip = socket.gethostbyname(Word_HostName)
-    world_fd.connect((world_ip,Word_PortNum))
+    world_ip = socket.gethostbyname(WORLD_HOSTNAME)
+    world_fd.connect((world_ip, WORLD_PORTNUM))
     sendMessage(Aconnect,world_fd)
     print("AConnect sent")
     Aconnected = wpb2.AConnected()
@@ -151,12 +158,5 @@ def connectWorld(warehouse_dict, worldid = None):
     connected = False
     if Aconnected.result == 'connected!':
         connected = True
-        session = Session()
-        session.begin()
-        for warehouse_id, warehouse_info in warehouse_dict.items():
-            New_Warehose = Warehouse(id = warehouse_id, x = warehouse_info['x'], y = warehouse_info['y'])
-            session.add(New_Warehose)
-            session.commit()
-        session.close()
 
     return world_fd, connected, world_id

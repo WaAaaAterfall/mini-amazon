@@ -4,6 +4,7 @@ import world_amazon_pb2 as wpb2
 from google.protobuf.internal.decoder import _DecodeVarint32
 from google.protobuf.internal.encoder import _EncodeVarint
 import time
+import threading
 
 import ups_amazon_pb2 as upb2
 import world_amazon_pb2 as wpb2
@@ -13,9 +14,9 @@ import world_amazon_pb2 as wpb2
 @init_engin: Drop all the tables and restart
 '''
 
-seqnum = 1
-Word_HostName = 'localhost'
-Word_PortNum = 23456
+g_seqnum = 1
+seqnum_lock = threading.Lock()
+
 toWorld = {}
 toUps = {}
 
@@ -53,19 +54,33 @@ def getMessage(socket):
     whole_message = socket.recv(msg_len)
     return whole_message
 
+
+'''In case to prevent any repeated assignment with one seqnum, use global lock'''
+def assign_unique_seqnum():
+    global g_seqnum
+    with seqnum_lock:
+        assigned_seqnum = g_seqnum
+        g_seqnum += 1
+    return assigned_seqnum
+
+
 '''
 @addToWorld: add to dict and increment the sequence number
 '''
-def addToWorld(Acommand):
-    toWorld[seqnum] = Acommand
-    seqnum = seqnum + 1
+def addToWorld(Acommand, current_seqnum):
+    if current_seqnum in toWorld:
+        raise ValueError("This seqnum has already been added into world command dict")
+    toWorld[current_seqnum] = Acommand
+
 
 '''
 @addToUps: add to dict and increment the sequence number
 '''
-def addToUps(Acommand):
-    toUps[seqnum] = Acommand
-    seqnum = seqnum + 1
+def addToUps(ATUcommand, current_seqnum):
+    if current_seqnum in toUps:
+        raise ValueError("This seqnum has already been added into UPS command dict")
+    toUps[current_seqnum] = ATUcommand
+
 
 '''
 @sendToworld: keep sending the message in dict toworld to the world
@@ -76,7 +91,8 @@ def sendToWorld(world_fd):
         time.sleep(1)
         for key, acommand in toWorld.items():
             sendMessage(world_fd, acommand)
-         
+
+
 '''
 @sendToUPS: keep sending the message in dict toUps to the world
 @warning: dict is not thread safe, we need add thread lock later
@@ -84,7 +100,7 @@ def sendToWorld(world_fd):
 def sendToUPS(ups_fd):
     while(True):
         time.sleep(1)
-        for key, acommand in toUps.items():
-            sendMessage(ups_fd, acommand)
+        for key, ATUcommand in toUps.items():
+            sendMessage(ups_fd, ATUcommand)
 
 
