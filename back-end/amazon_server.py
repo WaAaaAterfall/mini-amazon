@@ -8,8 +8,9 @@ def define_warehouse_product():
     warehouse_dict[1] = {'x': 20, 'y': 20}
     warehouse_dict[2] = {'x': 300, 'y': 300}
     product_dict = {}
-    product_dict[1] = {"This is a huge assignment you wrote in ece551"}
-    product_dict[2] = {"This is also a huge assignment from DUKE ECE"}
+    product_dict[1] = "This is a huge assignment you wrote in ece551"
+    product_dict[2] = "This is also a huge assignment from DUKE ECE"
+
     return warehouse_dict, product_dict
 
 
@@ -48,8 +49,10 @@ def connect_ups_world(atu_socket, ups_address):
         print("Create a thread to handle world command")
         thread_handle_world = threading.Thread(target = handleWorldResponse, args =(world_fd,))
         thread_handle_world.start()
-        if world_id_received != worldid:
-            raise ValueError("The connect world id is not the world ups required for")
+        #not to debug, uncomment those lines
+        # if world_id_received != worldid:
+        #     print(world_id_received)
+        #     raise ValueError("The connect world id is not the world ups required for")
         send_ATUConnected(world_id_received, atu_socket)
         print('Connected to', ups_address)
         break
@@ -117,14 +120,14 @@ def amazonStart():
     #Port for web: listen on 13145
     try:
         init_engine()
-        amazon_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        amazon_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        amazon_address = ('0.0.0.0', 13145)
-        # connect to front-end
-        print("Connect to front-end, create a thread to process order")
-        web_socket = accept_web(amazon_socket, amazon_address)
-        thread_handle_web = threading.Thread(target = process_order, args =(web_socket,))
-        thread_handle_web.start()
+        # amazon_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # amazon_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        # amazon_address = ('0.0.0.0', 13145)
+        # # connect to front-end
+        # print("Connect to front-end, create a thread to process order")
+        # web_socket = accept_web(amazon_socket, amazon_address)
+        # thread_handle_web = threading.Thread(target = process_order, args =(web_socket,))
+        # thread_handle_web.start()
 
         # connect to ups
         atu_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -132,10 +135,10 @@ def amazonStart():
         ups_address = ('0.0.0.0', 32345)
         connect_ups_world(atu_socket, ups_address)
 
-        thread_handle_web.join()
+        #thread_handle_web.join()
 
         atu_socket.close()
-        amazon_socket.close()
+        #amazon_socket.close()
     except ValueError as err:
         print("Raise error: ", err.args)
 

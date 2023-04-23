@@ -16,7 +16,7 @@ message Desti_loc{
 message ATURequestPickup{
     required string product_name = 1;
   	required int64 packageid = 2;
-	optional string ups_account = 3
+	optional string ups_account = 3;
   	required int64 whid = 4;
   	required Desti_loc destination = 5;
   	required int64 seqnum = 6;
@@ -52,7 +52,7 @@ message AUErr{
 }
 
 message ATUCommands{
-	repeated ATURequestPickUp topickup = 1;	
+	repeated ATURequestPickup topickup = 1;	
 	repeated ATULoaded loaded = 2;
 	repeated AUErr err = 3;
 	repeated int64 acks = 4;

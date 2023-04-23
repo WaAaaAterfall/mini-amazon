@@ -3,15 +3,13 @@ from amazon_create_msg import *
 from ups_interact import *
 from world_interact import *
 
-def addProductToDB():
-    
-def addOrderToDB():
+# def addOrderToDB():
 
-def test_UTAArrived():
+# def test_UTAArrived():
 
-def test_UTAOutDelivery():
+# def test_UTAOutDelivery():
 
-def test_UTADelivered():
+# def test_UTADelivered():
 
 def generate_UTAConnect(worldid):
     UTAConnect = upb2.UTAConnect()
@@ -22,14 +20,14 @@ def ups_send_rec_connect():
     # create a TCP socket
     ups_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     ups_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
+    WORLD_ID = 4
     # connect the socket to a specific address and port
     ups_address = ('localhost', 32345)
     print('Server is listening on {}:{}'.format(*ups_address))
     ups_socket.bind(ups_address)
     ups_socket.listen(100)
     amazon_socket, addr = ups_socket.accept()
-    request = generate_UTAConnect(1)
+    request = generate_UTAConnect(WORLD_ID)
     sendMessage(request, amazon_socket)
     print("Request sent to amazon: ", request)
     # receive data from server
@@ -48,5 +46,5 @@ def ups_send_rec_connect():
 
 if __name__ == '__main__':
     amazon_socket = ups_send_rec_connect()
-
+    
     print()

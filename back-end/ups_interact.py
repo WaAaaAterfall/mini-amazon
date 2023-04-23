@@ -131,7 +131,7 @@ def handle_ack(ack):
 
 
 def handle_UTACommands(ups_socket):
-    while (True):
+    while (False):
         UTACmd = upb2.UTACommands()
         # recv message from the world
         msg = getMessage(ups_socket)

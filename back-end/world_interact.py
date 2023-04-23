@@ -98,7 +98,7 @@ def handlePackagestatus(APackage, world_fd):
 
 def handleWorldResponse(world_fd):
     # each thread get one session
-    while (True):
+    while (False):
         Response = wpb2.AResponses()
         # recv message from the world
         msg = getMessage(world_fd)
@@ -147,12 +147,11 @@ def connectWorld(warehouse_dict, worldid = None):
     world_ip = socket.gethostbyname(WORLD_HOSTNAME)
     world_fd.connect((world_ip, WORLD_PORTNUM))
     sendMessage(Aconnect,world_fd)
-    print("AConnect sent")
+    print("AConnect sent with world id: ", worldid)
     Aconnected = wpb2.AConnected()
     msg = getMessage(world_fd)
     Aconnected.ParseFromString(msg)
     #print world id and result
-    #do i need to try catch if result is not connected
     world_id = Aconnected.worldid
     print(Aconnected.result)
     connected = False
