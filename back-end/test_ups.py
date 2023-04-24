@@ -4,11 +4,32 @@ from ups_interact import *
 from world_interact import *
 
 
-# def test_UTAArrived():
+def test_UTAArrived():
+    truck_id = 1
+    whid = 2
+    UTACommands = upb2.UTACommands()
+    arr = UTACommands.arrive.add()
+    arr.packageid.extend([3,5])
+    arr.truckid = truck_id
+    arr.whid = whid
+    arr.seqnum = 111
+    return UTACommands
 
-# def test_UTAOutDelivery():
+def test_UTAOutDelivery():
+    package_id = 3
+    UTACommands = upb2.UTACommands()
+    out = UTACommands.todeliver.add()
+    out.packageid = package_id
+    out.seqnum = 222
+    return UTACommands
 
-# def test_UTADelivered():
+def test_UTADelivered():
+    package_id = 3
+    UTACommands = upb2.UTACommands()
+    delivered = UTACommands.delivered.add()
+    delivered.packageid = package_id
+    delivered.seqnum = 333
+    return UTACommands
 
 def generate_UTAConnect(worldid):
     UTAConnect = upb2.UTAConnect()
@@ -44,8 +65,9 @@ def ups_send_rec_connect():
     #ups_socket.close()
 
 if __name__ == '__main__':
-    amazon_socket = ups_send_rec_connect()
-    while(1):
-        continue
+    #amazon_socket = ups_send_rec_connect()
+    print(test_UTAOutDelivery().todeliver[0])
+    print(test_UTADelivered())
+    handle_UTADelivered(test_UTADelivered().delivered[0], 11111)
 
     print()

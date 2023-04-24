@@ -34,7 +34,7 @@ def handle_UTAConnect(ups_socket):
 
 def handle_UTAArrived(UTAArrived, ups_socket):
     arrived_seqnum = UTAArrived.seqnum
-    send_ackCommand(arrived_seqnum, ups_socket)
+    #send_ackCommand(arrived_seqnum, ups_socket)
     truck_id = UTAArrived.truckid
     wh_id = UTAArrived.whid
     #check if all the required packages are packed
@@ -87,11 +87,12 @@ def handle_UTAArrived(UTAArrived, ups_socket):
 def handle_UTAOutDelivery(UTAOutDelivery, ups_socket):
     session = Session()
     out_del_seqnum = UTAOutDelivery.seqnum
+    #print("send ack to ups with seqnum: ", out_del_seqnum)
     send_ackCommand(out_del_seqnum, ups_socket)
 
     package_id = UTAOutDelivery.packageid
     session.begin()
-    order_to_deliver = session.query(Order).filter(Order.packageid == package_id).first()
+    order_to_deliver = session.query(Order).filter(Order.package_id == package_id).first()
     if order_to_deliver is None:
         atu_send_raise_error("Cannot find order to deliver", out_del_seqnum)
     order_to_deliver.status = 'OutForDelivery'
@@ -101,10 +102,11 @@ def handle_UTAOutDelivery(UTAOutDelivery, ups_socket):
 
 def handle_UTADelivered(UTADelivered, ups_socket):
     delivered_seqnum = UTADelivered.seqnum
+    #print("send ack to ups with seqnum: ", delivered_seqnum)
     send_ackCommand(delivered_seqnum, ups_socket)
     session = Session()
     session.begin()
-    package_id = UTADelivered.package_id
+    package_id = UTADelivered.packageid
     delivered_order = session.query(Order).filter(Order.package_id == package_id).first()
     if delivered_order is None:
         atu_send_raise_error("Cannot find delivered order", delivered_seqnum)

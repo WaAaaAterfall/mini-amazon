@@ -95,6 +95,16 @@ def handlePackagestatus(APackage, world_fd):
     session.commit()
     session.close()
 
+def handle_AErr(error):
+    print("error information: " + error.err)
+    print("error originseqnum: " + error.originseqnum)
+    print("error seqnum: " + error.seqnum)
+
+def handle_ack(ack):
+    # check if ack in toWorld key and remove from to send
+    if ack in toWorld:
+        toWorld.pop(ack)
+
 
 def handleWorldResponse(world_fd):
     # each thread get one session
@@ -107,18 +117,13 @@ def handleWorldResponse(world_fd):
         for error in Response.error:
             # send ack to the world
             sendACKToWorld(world_fd, error.seqnum)
-            print("error information: " + error.err)
-            print("error originseqnum: " + error.originseqnum)
-            print("error seqnum: " + error.seqnum)
+            handle_AErr(error)
 
         # deal with ack
         # find each ack in AResponses, and remove relenvent seq:ACommand from dict toWorld
         for ack in Response.acks:
-            # check if ack in toWorld key and remove from to send
-            if ack in toWorld:
-                toWorld.pop(ack)
+            handle_ack(ack)
         # now we need to handle purchase, pack, load
-        # in each section, we need to send ack to the world to avoid the world send the response multiply times
         for arrive in Response.arrived:
             if arrive.seqnum in handled_world:
                 continue

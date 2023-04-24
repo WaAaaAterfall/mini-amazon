@@ -3,13 +3,21 @@
 --4. Multiple order in one truck. Partially done but leave me alone
 5. get and send ups account name No ideaaaa
 6. unit test for ups 
-7. integration test
+all create done
+handle test_UTAOutDelivery done
+handle test_UTADelivered done
+handle UTAArrived
+
+7. unit test for world
+8. integration test
+
 1. try catch block design
 -----8. threadlock for seqnum adding？Done, hopefully
 -----9. program raises an error when handling command from world or ups, /
         also send a Error message to them ?should I?
 10: how to handle error?
 
+11. Connect part debug done
 test log:
 test ack
 test multiple time send one recv

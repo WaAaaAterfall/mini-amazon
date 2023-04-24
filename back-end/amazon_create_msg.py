@@ -23,33 +23,25 @@ def create_AUConnected(worldid):
 
 
 def create_AUErr(error, originseqnum):
-    ATUCommands = upb2.AUTCommands()
-    AUErr = ATUCommands.err
+    ATUCommands = upb2.ATUCommands()
+    AUErr = ATUCommands.err.add()
     AUErr.err = error
     AUErr.originseqnum = originseqnum
     AUErr.seqnum = assign_unique_seqnum()
     return ATUCommands, AUErr.seqnum
 
 
-def create_ATULoaded(package_id, truck_id):
-    ATUCommands = upb2.AUTCommands()
-    ATULoaded = ATUCommands.loaded
-    ATULoaded.packageid = package_id
-    ATULoaded.truckid = truck_id
-    ATULoaded.seqnum = assign_unique_seqnum()
-    return ATUCommands, ATULoaded.seqnum
-
-
 def create_ATURequestPickup(product_name, package_id, ups_account, wh_id, x, y):
-    ATUCommands = upb2.AUTCommands()
-    ATURequestPickup = ATUCommands.topickup
+    ATUCommands = upb2.ATUCommands()
+    ATURequestPickup = ATUCommands.topickup.add()
     ATURequestPickup.product_name = product_name
     ATURequestPickup.packageid = package_id
     if ups_account != "":
         ATURequestPickup.ups_account = ups_account
     ATURequestPickup.whid = wh_id
-    destination = create_destionation(x, y)
-    ATURequestPickup.destination = destination
+    dest = ATURequestPickup.destination
+    dest.x = x
+    dest.y = y
     ATURequestPickup.seqnum = assign_unique_seqnum()
     return ATUCommands, ATURequestPickup.seqnum
 
@@ -61,7 +53,6 @@ def create_ATULoaded(package_id, truck_id):
     loaded.truckid = truck_id
     loaded.seqnum = assign_unique_seqnum()
     return atuCommand, loaded.seqnum
-
 
 
 
@@ -89,18 +80,17 @@ def create_ATWPurchase(warehouse_id, product_id, description, count):
     athing.count = count
     return Acommand, buy.seqnum
 
-def create_ATWToPack(warehouse_id, things, package_id):
+def create_ATWToPack(warehouse_id, product_id, description, count, package_id):
     Acommand = wpb2.ACommands()
     Acommand.disconnect = False
     topack = Acommand.topack.add()
     topack.whnum = warehouse_id
     topack.seqnum = assign_unique_seqnum()
     topack.shipid  = package_id
-    for thing in things:
-        athing = topack.things.add()
-        athing.id = thing.id
-        athing.description = thing.description 
-        athing.count = thing.count
+    athing = topack.things.add()
+    athing.id = product_id
+    athing.description = description 
+    athing.count = count
     return Acommand, topack.seqnum
 
 def create_ATWQuery(package_id):

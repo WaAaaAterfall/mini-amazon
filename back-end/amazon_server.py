@@ -102,22 +102,24 @@ def process_order(package_id):
     session.commit()     
     x = sent_order.addr_x
     y = sent_order.addr_y
+    product_id = sent_order.product_id
+    description = sent_order.product.description
+    count = sent_order.count
     #TODO: UPSACCOUNT??????
     ups_account = None
     if check_inventory_availability(nearst_whid, sent_order.product_id, sent_order.count) == False:
-        product_id = sent_order.product_id
-        description = sent_order.product.description
-        count = sent_order.count
-        purchase_command, current_sn = create_ATWPurchase(nearst_whid, product_id, description, count)
+        purchase_command, purchase_sn = create_ATWPurchase(nearst_whid, product_id, description, count)
         print("inventory for sent_order", sent_order.package_id, "is not enough")
-        addToWorld(purchase_command, current_sn)
-    #Keep checking if the sent_order is available
+        addToWorld(purchase_command, purchase_sn)
+    # Keep checking if the sent_order is available
     #TODO: Create another thread?    
     while check_inventory_availability(nearst_whid, sent_order.product_id, sent_order.count) == False:
         continue
     print("sent_order ", sent_order.package_id, "is available, send request message to ups")
-    requestPickUp_command, current_sn = create_ATURequestPickup(description, package_id, ups_account, nearst_whid, x, y)
-    addToUps(requestPickUp_command, current_sn)
+    requestPickUp_command, pickup_sn = create_ATURequestPickup(description, package_id, ups_account, nearst_whid, x, y)
+    requestPack_command, topack_sn = create_ATWToPack(nearst_whid, product_id, description, count, package_id)
+    addToWorld(requestPack_command, topack_sn)
+    addToUps(requestPickUp_command, pickup_sn)
     session.close()
     
 
