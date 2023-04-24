@@ -39,10 +39,10 @@ def init_engine():
 @sendMessage: encode data length to send and sendmessage to corrosponding socket
 '''
 def sendMessage(message, socket):
-    print("message: ", message)
-    # msg = message.SerializeToString()
-    # _EncodeVarint(socket.sendall, len(msg), None)
-    # socket.sendall(msg)
+    #print("message: ", message)
+    msg = message.SerializeToString()
+    _EncodeVarint(socket.sendall, len(msg), None)
+    socket.sendall(msg)
 
 
 '''
@@ -96,7 +96,7 @@ def sendToWorld(world_fd):
         time.sleep(1)
         for key, acommand in toWorld.items():
             sendMessage(acommand, world_fd)
-            #print("send world: ",acommand)
+            print("send world: ",acommand)
 
 
 '''
@@ -108,6 +108,6 @@ def sendToUPS(ups_fd):
         time.sleep(1)
         for key, ATUcommand in toUps.items():
             sendMessage(ATUcommand, ups_fd)
-            #print("send ups: ", key)
+            print("send ups: ", ATUcommand)
 
 

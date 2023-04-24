@@ -60,7 +60,7 @@ def create_ATULoaded(package_id, truck_id):
 
 def create_ATWToload(warehouse_id, truck_id, package_id):
     Acommand = wpb2.ACommands()
-    Acommand.disconnect = False
+    #Acommand.disconnect = False
     load = Acommand.load.add()
     load.whnum = warehouse_id
     load.truckid = truck_id
@@ -70,7 +70,7 @@ def create_ATWToload(warehouse_id, truck_id, package_id):
 
 def create_ATWPurchase(warehouse_id, product_id, description, count):
     Acommand = wpb2.ACommands()
-    Acommand.disconnect = False
+    #Acommand.disconnect = False
     buy = Acommand.buy.add()
     buy.whnum = warehouse_id
     buy.seqnum = assign_unique_seqnum()
@@ -82,7 +82,7 @@ def create_ATWPurchase(warehouse_id, product_id, description, count):
 
 def create_ATWToPack(warehouse_id, product_id, description, count, package_id):
     Acommand = wpb2.ACommands()
-    Acommand.disconnect = False
+    #Acommand.disconnect = False
     topack = Acommand.topack.add()
     topack.whnum = warehouse_id
     topack.seqnum = assign_unique_seqnum()
@@ -95,7 +95,7 @@ def create_ATWToPack(warehouse_id, product_id, description, count, package_id):
 
 def create_ATWQuery(package_id):
     Acommand = wpb2.ACommands()
-    Acommand.disconnect = False
+    #Acommand.disconnect = False
     toquery = Acommand.queries.add()
     toquery.packageid = package_id
     toquery.seqnum = assign_unique_seqnum()
@@ -108,7 +108,7 @@ def create_ATWQuery(package_id):
 def sendACKToWorld(socket,ack):
     command = wpb2.ACommands()
     command.acks.append(ack)
-    command.disconnect = False
+    #command.disconnect = False
     sendMessage(command,socket)
 
 

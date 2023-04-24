@@ -2,6 +2,11 @@ from ups_interact import *
 from world_interact import *
 from web_interact import *
 
+UPS_HOSTNAME = 'vcm-30458.vm.duke.edu'
+UPS_PORTNUM = 32345
+WORLD_HOSTNAME = 'vcm-30458.vm.duke.edu'
+WORLD_PORTNUM = 23456
+
 def define_warehouse_product():
     warehouse_dict = {}
     warehouse_dict[1] = {'x': 20, 'y': 20}
@@ -37,7 +42,7 @@ def connect_ups_world_web(atu_socket, ups_address):
         warehouse_dict, product_dict = define_warehouse_product()
         world_fd = 0
         while (True):
-            fd, Connected, world_id_received = connectWorld(warehouse_dict)
+            fd, Connected, world_id_received = connectWorld(warehouse_dict, worldid)
             config_db(warehouse_dict, product_dict, world_id_received)
             world_fd = fd
             if Connected:
@@ -80,6 +85,37 @@ def connect_ups_world_web(atu_socket, ups_address):
     amazon_socket.close()    
 
 
+def connectWorld(warehouse_dict, worldid = None):
+    #generate Aconncet
+    Aconnect = wpb2.AConnect()
+    # Iterate over the dictionary of warehouse information
+    for warehouse_id, warehouse_info in warehouse_dict.items():
+        # Create a new warehouse object and set its properties
+        warehouse = Aconnect.initwh.add()
+        warehouse.id = warehouse_id
+        warehouse.x = warehouse_info['x']
+        warehouse.y = warehouse_info['y']
+    Aconnect.isAmazon = True
+    if(worldid != None):
+        Aconnect.worldid = worldid
+    print("World initialization over")
+    world_fd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    world_ip = socket.gethostbyname(WORLD_HOSTNAME)
+    world_fd.connect((world_ip, WORLD_PORTNUM))
+    sendMessage(Aconnect,world_fd)
+    print("AConnect sent with world id: ", worldid)
+    Aconnected = wpb2.AConnected()
+    msg = getMessage(world_fd)
+    Aconnected.ParseFromString(msg)
+    #print world id and result
+    world_id = Aconnected.worldid
+    print(Aconnected.result)
+    connected = False
+    if Aconnected.result == 'connected!':
+        connected = True
+
+    return world_fd, connected, world_id
+
 def accept_web(amazon_socket, amazon_address):
     print('Server is listening on {}:{}'.format(*amazon_address))
     amazon_socket.bind(amazon_address)
@@ -91,7 +127,6 @@ def accept_web(amazon_socket, amazon_address):
 def process_order(package_id):
     session = Session()
     session.begin()
-    print("?????",package_id)
     sent_order = session.query(Order).join(Product).options(joinedload(Order.product)).filter(Order.package_id == package_id, 
                                                     Order.product_id==Product.id).first()
     if sent_order is None:
@@ -147,7 +182,7 @@ def amazonStart():
         # connect to ups
         atu_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         atu_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        ups_address = ('0.0.0.0', 32345)
+        ups_address = (UPS_HOSTNAME, UPS_PORTNUM)
         connect_ups_world_web(atu_socket, ups_address)
 
         atu_socket.close()

@@ -4,9 +4,6 @@ from utils import *
 
 from amazon_create_msg import *
 
-WORLD_HOSTNAME = 'localhost'
-WORLD_PORTNUM = 23456
-
 
 # '''
 # @handlePurchase: send ack, edit database to addup the remain count
@@ -71,11 +68,11 @@ def handleLoaded(ALoaded, world_fd):
     session.query(Order).filter_by(
         package_id=shipid).update({"status": 'loaded'})
     session.commit()
-    order = session.query(Order).filter_by(package_id=shipid).first()
     #TODO: CHANGE HERE!
-    # inform ups the package has been loaded
-    atuCommand = create_ATULoaded(order.package_id,order.truck_id)
-    addToUps(atuCommand)
+    ## inform ups the package has been loaded
+    # order = session.query(Order).filter_by(package_id=shipid).first()
+    # atuCommand = create_ATULoaded(order.package_id,order.truck_id)
+    # addToUps(atuCommand)
     session.close()
 
 
@@ -144,35 +141,3 @@ def handleWorldResponse(world_fd):
                 continue
             handled_world.add(packagestatus.seqnum)
             handlePackagestatus(packagestatus, world_fd)
-
-
-def connectWorld(warehouse_dict, worldid = None):
-    #generate Aconncet
-    Aconnect = wpb2.AConnect()
-    # Iterate over the dictionary of warehouse information
-    for warehouse_id, warehouse_info in warehouse_dict.items():
-        # Create a new warehouse object and set its properties
-        warehouse = Aconnect.initwh.add()
-        warehouse.id = warehouse_id
-        warehouse.x = warehouse_info['x']
-        warehouse.y = warehouse_info['y']
-    Aconnect.isAmazon = True
-    if(worldid != None):
-        Aconnect.worldid = worldid
-    print("World initialization over")
-    world_fd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    world_ip = socket.gethostbyname(WORLD_HOSTNAME)
-    world_fd.connect((world_ip, WORLD_PORTNUM))
-    sendMessage(Aconnect,world_fd)
-    print("AConnect sent with world id: ", worldid)
-    Aconnected = wpb2.AConnected()
-    msg = getMessage(world_fd)
-    Aconnected.ParseFromString(msg)
-    #print world id and result
-    world_id = Aconnected.worldid
-    print(Aconnected.result)
-    connected = False
-    if Aconnected.result == 'connected!':
-        connected = True
-
-    return world_fd, connected, world_id

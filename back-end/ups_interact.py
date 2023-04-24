@@ -34,7 +34,7 @@ def handle_UTAConnect(ups_socket):
 
 def handle_UTAArrived(UTAArrived, ups_socket):
     arrived_seqnum = UTAArrived.seqnum
-    #send_ackCommand(arrived_seqnum, ups_socket)
+    send_ackCommand(arrived_seqnum, ups_socket)
     truck_id = UTAArrived.truckid
     wh_id = UTAArrived.whid
     #check if all the required packages are packed
@@ -65,23 +65,24 @@ def handle_UTAArrived(UTAArrived, ups_socket):
         addToWorld(Acommand)
     
     # TODO: CHANGE HERE!
-    # #Check if all the package status have become loaded
-    # all_loaded = False
-    # while (all_loaded == False):
-    #     all_loaded = True
-    #     for package_id in UTAArrived.packageid:
-    #         order_to_load = session.query(Order).filter_by(Order.packageid == package_id,
-    #                                                 Order.warehouse_id == wh_id).first()
-    #         if order_to_load is None:
-    #             atu_send_raise_error("Cannot find find the loaded order", arrived_seqnum)
-    #         if order_to_load.status == 'packed':
-    #             all_loaded = False
-    #             break
-    #         elif order_to_load.status == 'loaded':
-    #             continue
+    #Check if all the package status have become loaded
+    all_loaded = False
+    while (all_loaded == False):
+        all_loaded = True
+        for package_id in UTAArrived.packageid:
+            order_to_load = session.query(Order).filter_by(Order.packageid == package_id,
+                                                    Order.warehouse_id == wh_id).first()
+            if order_to_load is None:
+                atu_send_raise_error("Cannot find find the loaded order", arrived_seqnum)
+            if order_to_load.status == 'packed':
+                all_loaded = False
+                break
+            elif order_to_load.status == 'loaded':
+                continue
 
-    # #Send the ATULoaded message to UPS
-    #ATULoaded = create_ATULoaded()    
+    #Send the ATULoaded message to UPS
+    ATULoaded, loaded_sn= create_ATULoaded()   
+    addToUps(ATULoaded, loaded_sn) 
     
 
 def handle_UTAOutDelivery(UTAOutDelivery, ups_socket):
