@@ -98,7 +98,7 @@ def handlePackagestatus(APackage, world_fd):
 
 def handleWorldResponse(world_fd):
     # each thread get one session
-    while (False):
+    while (True):
         Response = wpb2.AResponses()
         # recv message from the world
         msg = getMessage(world_fd)
@@ -120,12 +120,24 @@ def handleWorldResponse(world_fd):
         # now we need to handle purchase, pack, load
         # in each section, we need to send ack to the world to avoid the world send the response multiply times
         for arrive in Response.arrived:
+            if arrive.seqnum in handled_world:
+                continue
+            handled_world.add(arrive.seqnum)
             handlePurchase(arrive, world_fd)
         for ready in Response.ready:
+            if ready.seqnum in handled_world:
+                continue
+            handled_world.add(ready.seqnum)
             handleReady(ready, world_fd)
         for loaded in Response.loaded:
+            if loaded.seqnum in handled_world:
+                continue
+            handled_world.add(loaded.seqnum)
             handleLoaded(loaded, world_fd)
         for packagestatus in Response.packagestatus:
+            if packagestatus.seqnum in handled_world:
+                continue
+            handled_world.add(packagestatus.seqnum)
             handlePackagestatus(packagestatus, world_fd)
 
 

@@ -1,5 +1,5 @@
 from sqlalchemy import Integer, Integer, Column, ForeignKey, TEXT, TIMESTAMP
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, joinedload, relationship
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -25,7 +25,7 @@ class Product(Base):
 
 
 class Inventory(Base):
-    __tablename__ = 'Inventory'
+    __tablename__ = 'inventory'
     id = Column(Integer, primary_key=True, autoincrement=True)
     product_id = Column(Integer, ForeignKey('product.id'))
     remain_count = Column(Integer)
@@ -38,10 +38,11 @@ class Order(Base):
     count = Column(Integer, nullable=False)
     status = Column(TEXT) #Delivered, OutForDelivery, Packed, Processing
     truck_id = Column(Integer, nullable=True)
-    warehouse_id = Column(Integer, ForeignKey('warehouse.id'))
+    warehouse_id = Column(Integer, ForeignKey('warehouse.id'), nullable=True)
     addr_x = Column(Integer)
     addr_y = Column(Integer)
     product_id = Column(Integer, ForeignKey('product.id'))
     #time = Column(TIMESTAMP, default=None, nullable=True)
+    product = relationship("Product")
 
 

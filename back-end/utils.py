@@ -17,8 +17,12 @@ import world_amazon_pb2 as wpb2
 g_seqnum = 1
 seqnum_lock = threading.Lock()
 
+#dict
 toWorld = {}
 toUps = {}
+#Hashset
+handled_world = {}
+handled_ups = {}
 
 def init_engine():
     # engine = create_engine(
@@ -90,7 +94,8 @@ def sendToWorld(world_fd):
     while(True):
         time.sleep(1)
         for key, acommand in toWorld.items():
-            sendMessage(world_fd, acommand)
+            #sendMessage(acommand, world_fd)
+            print("send world: ",acommand)
 
 
 '''
@@ -101,6 +106,7 @@ def sendToUPS(ups_fd):
     while(True):
         time.sleep(1)
         for key, ATUcommand in toUps.items():
-            sendMessage(ups_fd, ATUcommand)
+            #sendMessage(ATUcommand, ups_fd)
+            print("send ups: ", key)
 
 

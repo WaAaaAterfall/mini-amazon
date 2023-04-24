@@ -126,12 +126,14 @@ def handle_AUErr(AUErr, ups_socket):
 def handle_ack(ack):
     if ack in toUps:
         toUps.pop(ack)
-    else:
-        raise ValueError("ack does not exist in ups queue")
+    # ack may send multiple times, if acks does not exist in our send list 
+    # then we should handled them, not an error
+    # else:
+    #     raise ValueError("ack does not exist in ups queue")
 
 
 def handle_UTACommands(ups_socket):
-    while (False):
+    while (True):
         UTACmd = upb2.UTACommands()
         # recv message from the world
         msg = getMessage(ups_socket)
@@ -144,12 +146,21 @@ def handle_UTACommands(ups_socket):
             handle_ack(ack)
         
         for arrive in UTACmd.arrive:
+            if arrive.seqnum in handled_ups:
+                continue
+            handled_ups.add(arrive.seqnum)
             handle_UTAArrived(arrive, ups_socket)
         
         for to_deliver in UTACmd.todeliver:
+            if to_deliver.seqnum in handled_ups:
+                continue
+            handled_ups.add(to_deliver.seqnum)
             handle_UTAOutDelivery(to_deliver, ups_socket)
 
         for delivered in UTACmd.delivered:
+            if delivered.seqnum in handled_ups:
+                continue
+            handled_ups.add(delivered.seqnum)
             handle_UTADelivered(delivered, ups_socket)
 
 

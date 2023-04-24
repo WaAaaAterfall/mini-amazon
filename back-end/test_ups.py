@@ -3,7 +3,6 @@ from amazon_create_msg import *
 from ups_interact import *
 from world_interact import *
 
-# def addOrderToDB():
 
 # def test_UTAArrived():
 
@@ -46,5 +45,7 @@ def ups_send_rec_connect():
 
 if __name__ == '__main__':
     amazon_socket = ups_send_rec_connect()
-    
+    while(1):
+        continue
+
     print()

@@ -28,7 +28,7 @@ def create_AUErr(error, originseqnum):
     AUErr.err = error
     AUErr.originseqnum = originseqnum
     AUErr.seqnum = assign_unique_seqnum()
-    return ATUCommands
+    return ATUCommands, AUErr.seqnum
 
 
 def create_ATULoaded(package_id, truck_id):
@@ -37,7 +37,7 @@ def create_ATULoaded(package_id, truck_id):
     ATULoaded.packageid = package_id
     ATULoaded.truckid = truck_id
     ATULoaded.seqnum = assign_unique_seqnum()
-    return ATUCommands
+    return ATUCommands, ATULoaded.seqnum
 
 
 def create_ATURequestPickup(product_name, package_id, ups_account, wh_id, x, y):
@@ -51,7 +51,7 @@ def create_ATURequestPickup(product_name, package_id, ups_account, wh_id, x, y):
     destination = create_destionation(x, y)
     ATURequestPickup.destination = destination
     ATURequestPickup.seqnum = assign_unique_seqnum()
-    return ATUCommands
+    return ATUCommands, ATURequestPickup.seqnum
 
 
 def create_ATULoaded(package_id, truck_id):
@@ -60,7 +60,7 @@ def create_ATULoaded(package_id, truck_id):
     loaded.packageid = package_id
     loaded.truckid = truck_id
     loaded.seqnum = assign_unique_seqnum()
-    return atuCommand
+    return atuCommand, loaded.seqnum
 
 
 
@@ -75,7 +75,7 @@ def create_ATWToload(warehouse_id, truck_id, package_id):
     load.truckid = truck_id
     load.shipid = package_id
     load.seqnum = assign_unique_seqnum()
-    return Acommand
+    return Acommand, load.seqnum
 
 def create_ATWPurchase(warehouse_id, product_id, description, count):
     Acommand = wpb2.ACommands()
@@ -87,7 +87,7 @@ def create_ATWPurchase(warehouse_id, product_id, description, count):
     athing.id = product_id
     athing.description = description 
     athing.count = count
-    return Acommand
+    return Acommand, buy.seqnum
 
 def create_ATWToPack(warehouse_id, things, package_id):
     Acommand = wpb2.ACommands()
@@ -101,7 +101,7 @@ def create_ATWToPack(warehouse_id, things, package_id):
         athing.id = thing.id
         athing.description = thing.description 
         athing.count = thing.count
-    return Acommand
+    return Acommand, topack.seqnum
 
 def create_ATWQuery(package_id):
     Acommand = wpb2.ACommands()
@@ -109,7 +109,7 @@ def create_ATWQuery(package_id):
     toquery = Acommand.queries.add()
     toquery.packageid = package_id
     toquery.seqnum = assign_unique_seqnum()
-    return Acommand
+    return Acommand, toquery.seqnum
 
 
 '''
