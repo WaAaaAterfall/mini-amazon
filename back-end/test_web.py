@@ -25,10 +25,10 @@ if __name__ == '__main__':
     addOrderToDB()
     print("send package 3 to amazon")
     web_socket.sendall(str(3).encode('utf8'))
-    print("send package 5 to amazon")
-    web_socket.sendall(str(5).encode('utf8'))
-    print("send package 1 to amaozn")
-    web_socket.sendall(str(1).encode('utf8'))
+    # print("send package 5 to amazon")
+    # web_socket.sendall(str(5).encode('utf8'))
+    # print("send package 1 to amaozn")
+    # web_socket.sendall(str(1).encode('utf8'))
     while(1):
         continue
 

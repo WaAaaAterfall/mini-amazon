@@ -22,8 +22,12 @@ def handlePurchase(APurchaseMore, world_fd):
     for product in APurchaseMore.things:
         pd_id = product.id
         product_count = product.count
-        session.query(Inventory).filter_by(product_id=pd_id, warehouse_id=wh_id)\
-            .update({"amount": Inventory.remain_count + product_count})
+        inventory = session.query(Inventory).filter_by(product_id=pd_id, warehouse_id=wh_id).first()
+        if inventory is None:
+            new_invent = Inventory(product_id = pd_id, remain_count = product_count, warehouse_id = wh_id)
+            session.add(new_invent)
+        else:
+            inventory.update({"remain_count": Inventory.remain_count + product_count})
         session.commit()
     session.close()
 
@@ -40,8 +44,14 @@ def handleReady(APacked, world_fd):
     session.begin()
     # edit order status to packed
     shipid = APacked.shipid
-    session.query(Order).filter_by(
-        package_id=shipid).update({"status": 'packed'})
+    order = session.query(Order).filter(Order.package_id==shipid).first()
+    print("AAAAAAAAAAAAAAAAA", order)
+    order.status = 'packed'
+    product_id = order.product_id
+    wh_id = order.warehouse_id
+    inventory = session.query(Inventory).filter(Inventory.product_id==product_id,
+                                                Inventory.warehouse_id==wh_id).first()
+    inventory.remain_count -= order.count
     session.commit()
     session.close()
     # order = session.query(Order).filter_by(package_id=shipid).first()
@@ -109,6 +119,8 @@ def handleWorldResponse(world_fd):
         Response = wpb2.AResponses()
         # recv message from the world
         msg = getMessage(world_fd)
+        # if len(msg) == 0:
+        #     continue
         Response.ParseFromString(msg)
         # firstly let we deal with all errors----print them
         for error in Response.error:
@@ -120,24 +132,29 @@ def handleWorldResponse(world_fd):
         # find each ack in AResponses, and remove relenvent seq:ACommand from dict toWorld
         for ack in Response.acks:
             handle_ack(ack)
+            print("!!!! received world ack: ", ack)
         # now we need to handle purchase, pack, load
         for arrive in Response.arrived:
             if arrive.seqnum in handled_world:
                 continue
             handled_world.add(arrive.seqnum)
+            print("!!!! received world purchase arrive: ", arrive)
             handlePurchase(arrive, world_fd)
         for ready in Response.ready:
             if ready.seqnum in handled_world:
                 continue
             handled_world.add(ready.seqnum)
+            print("!!!! received world packed ready: ", ready)
             handleReady(ready, world_fd)
         for loaded in Response.loaded:
             if loaded.seqnum in handled_world:
                 continue
             handled_world.add(loaded.seqnum)
+            print("!!!! received world loaded: ", loaded)
             handleLoaded(loaded, world_fd)
         for packagestatus in Response.packagestatus:
             if packagestatus.seqnum in handled_world:
                 continue
             handled_world.add(packagestatus.seqnum)
+            print("!!!! received world packagestatus: ", packagestatus)
             handlePackagestatus(packagestatus, world_fd)

@@ -40,17 +40,18 @@ def connect_ups_world_web(atu_socket, ups_address):
 
         #define warehouse and product in the world
         warehouse_dict, product_dict = define_warehouse_product()
-        world_fd = 0
         while (True):
             fd, Connected, world_id_received = connectWorld(warehouse_dict, worldid)
             config_db(warehouse_dict, product_dict, world_id_received)
-            world_fd = fd
             if Connected:
                 #listen on world
+                thread_handle_world = threading.Thread(target = handleWorldResponse, args =(fd,))
+                thread_handle_world.start()
+                thread_send_world = threading.Thread(target = sendToWorld, args =(fd,))
+                thread_send_world.start()
                 break
         print("Create a thread to handle world command")
-        thread_handle_world = threading.Thread(target = handleWorldResponse, args =(world_fd,))
-        thread_handle_world.start()
+        
 
         #not to debug, uncomment those lines
         # if world_id_received != worldid:
@@ -63,8 +64,7 @@ def connect_ups_world_web(atu_socket, ups_address):
     print("Connection to ups and world should finish, creat thread to handle function")
     thread_send_ups = threading.Thread(target = sendToUPS, args =(atu_socket,))
     thread_send_ups.start()
-    thread_send_world = threading.Thread(target = sendToWorld, args =(world_fd,))
-    thread_send_world.start()
+
     
     #Now connect to front-end
     amazon_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -81,7 +81,7 @@ def connect_ups_world_web(atu_socket, ups_address):
     thread_send_world.join()
     thread_send_ups.join()
 
-    world_fd.close()  
+    #world_fd.close()  
     amazon_socket.close()    
 
 
@@ -113,7 +113,6 @@ def connectWorld(warehouse_dict, worldid = None):
     connected = False
     if Aconnected.result == 'connected!':
         connected = True
-
     return world_fd, connected, world_id
 
 def accept_web(amazon_socket, amazon_address):
@@ -141,7 +140,7 @@ def process_order(package_id):
     description = sent_order.product.description
     count = sent_order.count
     #TODO: UPSACCOUNT??????
-    ups_account = None
+    ups_account = ""
     if check_inventory_availability(nearst_whid, sent_order.product_id, sent_order.count) == False:
         purchase_command, purchase_sn = create_ATWPurchase(nearst_whid, product_id, description, count)
         print("inventory for sent_order", sent_order.package_id, "is not enough")

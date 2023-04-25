@@ -21,8 +21,8 @@ seqnum_lock = threading.Lock()
 toWorld = {}
 toUps = {}
 #Hashset
-handled_world = {}
-handled_ups = {}
+handled_world = set()
+handled_ups = set()
 
 def init_engine():
     # engine = create_engine(
@@ -51,11 +51,20 @@ def sendMessage(message, socket):
 def getMessage(socket):
     var_int_buff = []
     while True:
-        buf = socket.recv(1)
-        var_int_buff += buf
-        msg_len, new_pos = _DecodeVarint32(var_int_buff, 0)
-        if new_pos != 0:
-            break
+        # buf = socket.recv(1)
+        # var_int_buff += buf
+        # msg_len, new_pos = _DecodeVarint32(var_int_buff, 0)
+        # if new_pos != 0:
+        #     break
+        try:
+            buf = socket.recv(1)
+            var_int_buff += buf
+            msg_len, new_pos = _DecodeVarint32(var_int_buff, 0)
+            if new_pos != 0:
+                break
+        except:
+            whole_message = []
+            return whole_message
     whole_message = socket.recv(msg_len)
     return whole_message
 
@@ -93,10 +102,12 @@ def addToUps(ATUcommand, current_seqnum):
 '''
 def sendToWorld(world_fd):
     while(True):
-        time.sleep(1)
+        time.sleep(10)
+        print("Current world seqnum: ", toWorld.keys())
+        print("Current handled world seqnum, ", handled_world)
         for key, acommand in toWorld.items():
             sendMessage(acommand, world_fd)
-            print("send world: ",acommand)
+            #print("send world: ",acommand)
 
 
 '''
@@ -105,9 +116,11 @@ def sendToWorld(world_fd):
 '''
 def sendToUPS(ups_fd):
     while(True):
-        time.sleep(1)
+        time.sleep(10)
+        print("Current ups seqnum: ", toUps.keys())
+        print("Current handled ups seqnum, ", handled_ups)
         for key, ATUcommand in toUps.items():
             sendMessage(ATUcommand, ups_fd)
-            print("send ups: ", ATUcommand)
+            #print("send ups: ", ATUcommand)
 
 
