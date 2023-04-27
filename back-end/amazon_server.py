@@ -7,26 +7,26 @@ UPS_PORTNUM = 32345
 WORLD_HOSTNAME = 'vcm-30458.vm.duke.edu'
 WORLD_PORTNUM = 23456
 
-def define_warehouse_product():
+def define_warehouse():
     warehouse_dict = {}
     warehouse_dict[1] = {'x': 20, 'y': 20}
     warehouse_dict[2] = {'x': 300, 'y': 300}
-    product_dict = {}
-    product_dict[1] = "This is a huge assignment you wrote in ece551"
-    product_dict[2] = "This is also a huge assignment from DUKE ECE"
-    return warehouse_dict, product_dict
+    return warehouse_dict
 
+def init_product(sqlfile):
+    with open(sqlfile, 'r') as f:
+        sql = f.read()
+    sql_statement = text(sql)
 
-def config_db(warehouse_dict, product_dict, world_id_received):
+    with engine.connect() as conn:
+        conn.execute(sql_statement)
+
+def config_warehouse(warehouse_dict, world_id_received):
     session = Session()
     session.begin()
     for warehouse_id, warehouse_info in warehouse_dict.items():
         new_warehose = Warehouse(id = warehouse_id, world_id = world_id_received, x = warehouse_info['x'], y = warehouse_info['y'])
         session.add(new_warehose)
-        session.commit()
-    for product_id, product_desc in product_dict.items():
-        new_product = Product(id = product_id, description = product_desc)
-        session.add(new_product)
         session.commit()
     session.close()
 
@@ -39,10 +39,10 @@ def connect_ups_world_web(atu_socket, ups_address):
         thread_handle_ups.start()
 
         #define warehouse and product in the world
-        warehouse_dict, product_dict = define_warehouse_product()
         while (True):
+            warehouse_dict = define_warehouse()
             fd, Connected, world_id_received = connectWorld(warehouse_dict, worldid)
-            config_db(warehouse_dict, product_dict, world_id_received)
+            config_warehouse(warehouse_dict, world_id_received)
             if Connected:
                 #listen on world
                 thread_handle_world = threading.Thread(target = handleWorldResponse, args =(fd,))
@@ -177,7 +177,7 @@ def amazonStart():
     #Port for web: listen on 13145
     try:
         init_engine()
-
+        init_product('init_product.sql')
         # connect to ups
         atu_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         atu_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

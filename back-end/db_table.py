@@ -1,6 +1,6 @@
-from sqlalchemy import Integer, Integer, Column, ForeignKey, TEXT, TIMESTAMP
+from sqlalchemy import Integer, Float, Column, ForeignKey, TEXT, TIMESTAMP
 from sqlalchemy.orm import declarative_base, joinedload, relationship
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
 
@@ -22,7 +22,11 @@ class Warehouse(Base):
 class Product(Base):
     __tablename__ = 'product'
     id = Column(Integer, primary_key=True, autoincrement=False)
+    title = Column(TEXT)
     description = Column(TEXT)
+    price = Column(Float, nullable=False, default = 1)
+    img = Column(TEXT)
+    sales = Column(Integer, default=0)
 
 
 class Inventory(Base):
@@ -37,12 +41,13 @@ class Order(Base):
     __tablename__ = 'order'
     package_id = Column(Integer, primary_key=True, autoincrement=False)
     count = Column(Integer, nullable=False)
-    status = Column(TEXT) #Delivered, OutForDelivery, Packed, Processing
+    status = Column(TEXT, default = "Processing") #Delivered, OutForDelivery, Packed, Processing
     truck_id = Column(Integer, nullable=True)
     warehouse_id = Column(Integer, ForeignKey('warehouse.id'), nullable=True)
     addr_x = Column(Integer)
     addr_y = Column(Integer)
     product_id = Column(Integer, ForeignKey('product.id'))
+    user = Column()
     #time = Column(TIMESTAMP, default=None, nullable=True)
     product = relationship("Product")
 

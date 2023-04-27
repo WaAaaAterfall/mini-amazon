@@ -32,7 +32,7 @@ def init_engine():
     # print('Opened database successfully')
     Base.metadata.drop_all(engine)
     print('Drop tables successfully')
-    Base.metadata.create_all(engine)
+    # Base.metadata.create_all(engine)
 
 
 '''
