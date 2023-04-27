@@ -1,20 +1,20 @@
 {% extends "amazon/base.html" %}
+{% load crispy_forms_tags %}
 {% block content %}
+
 <div class="content-section">
     <form method="POST">
         {% csrf_token %}
         <fieldset class="form-group">
-            <legend class="border-bottom mb-4">Fill Adress Information</legend>
-            {{form.as_p }}
+            <legend class="border-bottom mb-4">Register</legend>
+        {{ form|crispy }}
         </fieldset>
-        <div class="form-group">
-            <button class="btn" type="submit">Confirm</button>
-        </div>
+        <button class="btn" type="submit"> Sign Up </button>
     </form>
     <div class="border-top pt-3">
         <small class="text-muted">
-             <a class="ml-2" href="{% url 'cart' %}">cancel</a>
+            Already have an account? <a class="ml-2" href="{% url 'login' %}">Sign In</a>
         </small>
     </div>
 </div>
-{% endblock content %}
+{% endblock content%}

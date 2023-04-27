@@ -1,0 +1,68 @@
+{% extends "amazon/base.html" %}
+{% load static %}
+{% load mathfilters %} 
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title"> <i class="fas fa-user"></i> User Profile</h4>
+                    <p class="card-text"><strong>Username:</strong> {{ user.username }}</p>
+                    <p class="card-text"><strong>Email:</strong> {{ user.email }}</p>
+                    <p class="card-text"><strong>UPS Account:</strong> {{ user.ups_account }}</p>
+                    <a href="{% url 'user_edit' %}" class="btn btn-primary">Update Profile</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">History Orders</h4>
+                    {% for order in orders %}
+                    <div class="card mb-3">
+                        <div class="card-header ">
+                            Order #{{ order.package_id }}
+                            <div class="d-flex  justify-content-between align-items-center h-100">
+                            <a href="{% url 'order_detail' order.package_id %}" class="btn btn-outline-primary btn-track-order" style="width: 300px;" >TRACK ORDER DETAIL</a>
+                            <a href="{% url 'remove_order' order.package_id %}"  style="color: #cecece;" class="float-right"><i
+                                class="fas fa-trash-alt"></i></a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div class="d-flex flex-row align-items-center">
+                                  <div>
+                                    <a href="{% url 'product_detail' order.product.id %}"> 
+                                    <img
+                                      src={{order.product.img}}
+                                      class="img-fluid rounded-3" alt="Shopping item" style="width: 65px;">
+                                    </a>
+                                  </div>
+                                  <div class="ms-3">
+                                    
+                                    <h5>{{order.product.title}}</h5>
+                                    <br>
+                                    <br>
+                    
+                                  </div>
+                                </div>
+                                <div class="d-flex flex-row align-items-center">
+                                  <div style="width: 50px;">
+                                    <h5 class="fw-normal mb-0">{{order.quantity}}</h5>
+                                  </div>
+                                
+                
+                              </div>
+                    
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

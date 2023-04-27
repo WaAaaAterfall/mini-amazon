@@ -1,0 +1,40 @@
+{% extends "amazon/base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="container-01 mt-3">
+    <div class="col-md-3">
+        <ul class="list-group">
+            <li class="list-group-item  font-weight-bold "><a href="{% url 'products' 'all' %}"><span class="text-muted">All Categories</span></a></li>
+            {% for category in category_names %}
+            <li class="list-group-item "><a href="{% url 'products' category %}"><span class="text-muted">{{ category }}</span></a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="col-md-9">
+        <div class="row">
+            {% for item in products %}
+            <div class="col-md-6 col-lg-6 col-xl-6 mb-3">
+                <div class="card">
+                    <a href="{% url 'product_detail' item.Product.id %}">
+                        <img src="{{ item.Product.img }}" class="card-img-top">
+                    </a>
+                    <div class="card-body">
+                        <p class="card-text">{{ item.Product.description|slice:":10" }}</p>
+                        <span class="h5 text-primary" style="color: #155185;">$ {{ item.Product.price }}</span>
+                        <form method="POST" action="{% url 'add_to_cart' item.Product.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary font-weight-bold">Add to Cart</button>
+                        </form>
+
+
+                    </div>
+                  
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

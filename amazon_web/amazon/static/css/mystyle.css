@@ -1,0 +1,127 @@
+.card-stepper {
+    z-index: 0;
+  }
+  
+  #progressbar-1 {
+    color: #455A64;
+  }
+  
+  #progressbar-1 li {
+    list-style-type: none;
+    font-size: 13px;
+    width: 25%;
+    float: left;
+    position: relative;
+    text-align: center; /* add this to center the text in each li tag */
+  }
+  
+  #progressbar-1 #step1:before {
+    content: '\f058';
+    font-family: "Font Awesome 5 Free";
+    color: #fff;
+    width: 37px;
+    margin-left: 0px;
+    padding-left: 0px;
+  }
+  
+  #progressbar-1 #step2:before {
+    content: '\f058';
+    font-family: "Font Awesome 5 Free";
+    color: #fff;
+    width: 37px;
+  }
+  
+  #progressbar-1 #step3:before {
+    content: '\f058';
+    font-family: "Font Awesome 5 Free";
+    color: #fff;
+    width: 37px;
+    margin-right: 0;
+  }
+  
+  #progressbar-1 #step4:before {
+    content: '\f111';
+    font-family: "Font Awesome 5 Free";
+    color: #fff;
+    width: 37px;
+    margin-right: 0;
+  }
+  
+  #progressbar-1 li:before {
+    line-height: 37px;
+    display: block;
+    font-size: 12px;
+    background: #c5cae9;
+    border-radius: 50%;
+  }
+  
+  #progressbar-1 li:after {
+    content: '';
+    width: 121%;
+    height: 10px;
+    background: #c5cae9;
+    position: absolute;
+    left: 0%;
+    right: 0%;
+    top: 15px;
+    z-index: -1;
+  }
+  
+  #progressbar-1 li:nth-child(1):after {
+    left: 1%;
+    width: 100%;
+  }
+  
+  #progressbar-1 li:nth-child(2):after {
+    left: 1%;
+    width: 100%;
+  }
+  
+  #progressbar-1 li:nth-child(3):after {
+    left: 1%;
+    width: 100%;
+  }
+  
+  #progressbar-1 li:nth-child(4) {
+    left: 0%;
+    width: 25%; /* change from 37px to 25% to make it the same width as the other li tags */
+  }
+  
+  #progressbar-1 li:nth-child(4):before {
+    content: "4"; /* add content for the fourth li tag */
+  }
+  
+  #progressbar-1 li:nth-child(4):after {
+    left: 0%; /* change from 0 to 25% to align with the other li tags */
+    width: 100%; /* change from 0 to 75% to fill the remaining space */
+  }
+  
+  #progressbar-1 li.active:before,
+  #progressbar-1 li.active:after {
+    background: #6520ff;
+  }
+
+
+
+  .container-01 {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 20px;
+}
+
+
+
+
+
+
+img {
+  width: 300px;
+  height: 200px;
+  object-fit: contain;
+}
+
+
+address { 
+  display: block;
+  font-style: italic;
+} 

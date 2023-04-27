@@ -1,0 +1,60 @@
+{% extends "amazon/base.html" %}
+{% load static %}
+{% block content %}
+<section class="vh-100 gradient-custom-2">
+    <div class="container py-5 h-100">
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-12">
+          <div class="card card-stepper" style="border-radius: 16px;">
+            <div class="card-header p-4">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <p class="text-muted mb-2"> Order ID <span class="fw-bold text-body">{{order.id}}</span></p>
+                </div>
+              </div>
+            </div>
+            <div class="card-body p-4">
+              <div class="d-flex flex-row mb-4 pb-2">
+                <div class="flex-fill">
+                  <h5 class="bold">{{order.product.title}}</h5>
+                  <p class="text-muted"> Qt: {{order.quantity}} item</p>
+    
+                  <h4 class="mb-3"> $ {{order.product.price}} </h4>
+                  <p class="text-muted"> Adr: (x: {{order.addr_x}}, y: {{order.addr_y}})</p>
+    
+                  <p class="text-muted">Tracking Number: {{order.package_id}}</p>
+
+                  <p class="text-muted">Tracking Status on: <span class="text-body">{{time_string}}, Today</span></p>
+                </div>
+                <div>
+                  <a href="{% url 'product_detail' order.product.id %}"> 
+                  <img class="align-self-center img-fluid"
+                    src={{order.product.img}} width="250">
+                  </a>
+                </div>
+              </div>
+              <ul id="progressbar-1" class="mx-0 mt-0 mb-5 px-0 pt-0 pb-4">
+                <li class="step1 active text-muted" id="step1"><span
+                    > Processing</span></li>
+                <li class="step2 {% if order.status == 'Packed' or order.status == 'OutForDelivery' or order.status == 'Delivered' %} active{% else %} text-muted{% endif %}  " id="step2"><span>Packed</span></li>
+                <li class="step3 {% if order.status == 'Delivered' or order.status == 'OutForDelivery'  %} active{% else %} text-muted{% endif %} " id="step3"><span
+                    >OutForDelivery</span></li>
+                <li class="step4 {% if order.status == 'Delivered'  %} active{% else %} text-muted{% endif %} text-end" id="step3"><span
+                        >Delivered</span></li>
+              </ul>
+            </div>
+            <div class="card-footer p-4">
+              <div class="d-flex justify-content-between">
+                <h5 class="fw-normal mb-0"><a href="{% url 'user_profile' %}">Back</a></h5>
+                <div class="border-start h-100"></div>
+                <h5 class="fw-normal mb-0"><a href="{% url 'add_to_cart' order.product.id %}">Add to Cart again</a></h5>
+                <div class="border-start h-100"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endblock %}
+  

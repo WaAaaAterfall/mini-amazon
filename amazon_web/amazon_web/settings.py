@@ -29,9 +29,15 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
+CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
 INSTALLED_APPS = [
     'amazon.apps.AmazonConfig',
+    'crispy_forms',
+    'mathfilters',
+    'django_countries',
+    'crispy_bootstrap5',
+    'bootstrap5',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -69,6 +75,14 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'amazon_web.wsgi.application'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = True  # 是否使用TLS安全传输协议(用于在两个通信应用程序之间提供保密性和数据完整性
+EMAIL_USE_SSL = False  # 是否使用SSL加密，qq企业邮箱要求使用
+EMAIL_HOST = 'smtp.163.com'  # 发送邮件的邮箱 的 SMTP服务器，这里用了163邮箱
+EMAIL_PORT = 25  # 发件箱的SMTP服务器端口
+EMAIL_HOST_USER = 'huidan_tan@163.com'  # 发送邮件的邮箱地址
+EMAIL_HOST_PASSWORD = 'EUEZROEPYLUEYAAZ'
 
 
 # Database
@@ -110,7 +124,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/New_York'  # change
 
 USE_I18N = True
 
