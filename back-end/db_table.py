@@ -2,11 +2,12 @@ from sqlalchemy import Integer, Integer, Column, ForeignKey, TEXT, TIMESTAMP
 from sqlalchemy.orm import declarative_base, joinedload, relationship
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import NullPool
 
 # engine = create_engine(
 #     'postgresql://postgres:postgres@postgres_db_container:5432/postgres')
 engine = create_engine(
-    'postgresql://postgres:passw0rd@localhost:5432/amazon_568')
+    'postgresql://postgres:passw0rd@localhost:5432/amazon_568', poolclass=NullPool)
 Session = sessionmaker(bind=engine)
 Base = declarative_base()
 

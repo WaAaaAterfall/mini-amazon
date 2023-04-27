@@ -30,7 +30,7 @@ message UTAArrived{
 }
 
 message ATULoaded{
-  	required int64 packageid = 1;
+  	repeated int64 packageid = 1;
   	required int64 truckid = 2;
 	required int64 seqnum = 3; 
 }

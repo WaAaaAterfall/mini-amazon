@@ -11,6 +11,7 @@ def create_destionation(x, y):
     return dest
 
 def send_ackCommand(ack, atu_socket):
+    print("send ack to ups: ", ack)
     ATUCommands = upb2.ATUCommands()
     ATUCommands.acks.append(ack)
     sendMessage(ATUCommands, atu_socket)
@@ -46,10 +47,9 @@ def create_ATURequestPickup(product_name, package_id, ups_account, wh_id, x, y):
     return ATUCommands, ATURequestPickup.seqnum
 
 
-def create_ATULoaded(package_id, truck_id):
+def create_ATULoaded(truck_id):
     atuCommand = upb2.ATUCommands()
     loaded = atuCommand.loaded.add()
-    loaded.packageid = package_id
     loaded.truckid = truck_id
     loaded.seqnum = assign_unique_seqnum()
     return atuCommand, loaded.seqnum
@@ -107,6 +107,7 @@ def create_ATWQuery(package_id):
 '''
 def sendACKToWorld(socket,ack):
     command = wpb2.ACommands()
+    print("send ack to world: ", ack)
     command.acks.append(ack)
     #command.disconnect = False
     sendMessage(command,socket)

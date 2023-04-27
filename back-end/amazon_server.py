@@ -51,12 +51,11 @@ def connect_ups_world_web(atu_socket, ups_address):
                 thread_send_world.start()
                 break
         print("Create a thread to handle world command")
-        
 
-        #not to debug, uncomment those lines
-        # if world_id_received != worldid:
-        #     print(world_id_received)
-        #     raise ValueError("The connect world id is not the world ups required for")
+        if world_id_received != worldid:
+            print(world_id_received)
+            raise ValueError("The connect world id is not the world ups required for")
+        
         send_ATUConnected(world_id_received, atu_socket)
         print('Connected to', ups_address)
         break
@@ -131,6 +130,7 @@ def process_order(package_id):
     if sent_order is None:
         raise ValueError("Cannot find the sent_order sent from front end")
     nearst_whid = findWarehouse(sent_order.addr_x, sent_order.addr_y,session)
+    print("!!!@@@@@@product id on warehouse id",package_id, nearst_whid)
     # update sent_order to inclue warehouse id
     sent_order.warehouse_id = nearst_whid
     session.commit()     

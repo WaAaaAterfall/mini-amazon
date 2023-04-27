@@ -39,7 +39,6 @@ def init_engine():
 @sendMessage: encode data length to send and sendmessage to corrosponding socket
 '''
 def sendMessage(message, socket):
-    #print("message: ", message)
     msg = message.SerializeToString()
     _EncodeVarint(socket.sendall, len(msg), None)
     socket.sendall(msg)
@@ -51,20 +50,21 @@ def sendMessage(message, socket):
 def getMessage(socket):
     var_int_buff = []
     while True:
-        # buf = socket.recv(1)
-        # var_int_buff += buf
-        # msg_len, new_pos = _DecodeVarint32(var_int_buff, 0)
-        # if new_pos != 0:
-        #     break
-        try:
-            buf = socket.recv(1)
-            var_int_buff += buf
-            msg_len, new_pos = _DecodeVarint32(var_int_buff, 0)
-            if new_pos != 0:
-                break
-        except:
-            whole_message = []
-            return whole_message
+        print(socket)
+        buf = socket.recv(1)
+        var_int_buff += buf
+        msg_len, new_pos = _DecodeVarint32(var_int_buff, 0)
+        if new_pos != 0:
+            break
+        # try:
+        #     buf = socket.recv(1)
+        #     var_int_buff += buf
+        #     msg_len, new_pos = _DecodeVarint32(var_int_buff, 0)
+        #     if new_pos != 0:
+        #         break
+        # except:
+        #     whole_message = []
+        #     return whole_message
     whole_message = socket.recv(msg_len)
     return whole_message
 
@@ -102,11 +102,18 @@ def addToUps(ATUcommand, current_seqnum):
 '''
 def sendToWorld(world_fd):
     while(True):
-        time.sleep(10)
+        time.sleep(5)
         print("Current world seqnum: ", toWorld.keys())
         print("Current handled world seqnum, ", handled_world)
-        for key, acommand in toWorld.items():
+        world_copy = toWorld.copy()
+        count = 1
+        for key, acommand in world_copy.items():
             sendMessage(acommand, world_fd)
+            time.sleep(1)
+            count += 1
+            if count % 3 == 0:
+                count = 1
+                time.sleep(5)
             #print("send world: ",acommand)
 
 
@@ -119,8 +126,14 @@ def sendToUPS(ups_fd):
         time.sleep(10)
         print("Current ups seqnum: ", toUps.keys())
         print("Current handled ups seqnum, ", handled_ups)
-        for key, ATUcommand in toUps.items():
+        ups_copy = toUps.copy()
+        count = 1
+        for key, ATUcommand in ups_copy.items():
             sendMessage(ATUcommand, ups_fd)
+            count += 1
+            if count % 3 == 0:
+                count = 1
+                time.sleep(5)
             #print("send ups: ", ATUcommand)
 
 
