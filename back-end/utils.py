@@ -30,7 +30,7 @@ def init_engine():
     # engine = create_engine(
     #     'postgresql://postgres:postgres@postgres_db_container:5432/postgres')
     # print('Opened database successfully')
-    Base.metadata.drop_all(engine)
+    #Base.metadata.drop_all(engine)
     print('Drop tables successfully')
     # Base.metadata.create_all(engine)
 

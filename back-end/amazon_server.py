@@ -20,7 +20,8 @@ def init_product(sqlfile):
 
     with engine.connect() as conn:
         conn.execute(sql_statement)
-
+        conn.commit()
+        
 def config_warehouse(warehouse_dict, world_id_received):
     session = Session()
     session.begin()
