@@ -138,10 +138,14 @@ def process_order(package_id):
     x = sent_order.addr_x
     y = sent_order.addr_y
     product_id = sent_order.product_id
-    description = sent_order.product.description
+    description = sent_order.product.title
     count = sent_order.count
     #TODO: UPSACCOUNT??????
     ups_account = ""
+    if sent_order.ups_account is None:
+        ups_account = ""
+    else:
+        ups_account = sent_order.ups_account
     if check_inventory_availability(nearst_whid, sent_order.product_id, sent_order.count) == False:
         purchase_command, purchase_sn = create_ATWPurchase(nearst_whid, product_id, description, count)
         print("inventory for sent_order", sent_order.package_id, "is not enough")

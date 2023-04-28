@@ -37,7 +37,9 @@ message ATULoaded{
 
 message UTAOutDelivery{
 	required int64 packageid = 1;
-	required int64 seqnum = 2; 
+	required int64 x = 2;
+	required int64 y = 3;
+	required int64 seqnum = 4;
 }
 
 message UTADelivered{

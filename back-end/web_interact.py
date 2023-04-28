@@ -17,6 +17,7 @@ def check_inventory_availability(warehouse_id, product_id, request_count):
     for inventory in request_inventory:
         total_count += inventory.remain_count
     if request_count <= total_count:
+        print("!!!!!!!!!!!!!!!!!!!!The inventory for ", product_id, " is ", total_count)
         return True
     else:
         return False

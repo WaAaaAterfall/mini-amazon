@@ -114,7 +114,7 @@ def sendToWorld(world_fd):
             if count % 3 == 0:
                 count = 1
                 time.sleep(5)
-            #print("send world: ",acommand)
+            print("send world: ",acommand)
 
 
 '''

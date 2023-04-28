@@ -68,7 +68,7 @@ def create_ATWToload(warehouse_id, truck_id, package_id):
     load.seqnum = assign_unique_seqnum()
     return Acommand, load.seqnum
 
-def create_ATWPurchase(warehouse_id, product_id, description, count):
+def create_ATWPurchase(warehouse_id, product_id, title, count):
     Acommand = wpb2.ACommands()
     #Acommand.disconnect = False
     buy = Acommand.buy.add()
@@ -76,11 +76,11 @@ def create_ATWPurchase(warehouse_id, product_id, description, count):
     buy.seqnum = assign_unique_seqnum()
     athing=buy.things.add()
     athing.id = product_id
-    athing.description = description 
+    athing.description = title 
     athing.count = count
     return Acommand, buy.seqnum
 
-def create_ATWToPack(warehouse_id, product_id, description, count, package_id):
+def create_ATWToPack(warehouse_id, product_id, title, count, package_id):
     Acommand = wpb2.ACommands()
     #Acommand.disconnect = False
     topack = Acommand.topack.add()
@@ -89,7 +89,7 @@ def create_ATWToPack(warehouse_id, product_id, description, count, package_id):
     topack.shipid  = package_id
     athing = topack.things.add()
     athing.id = product_id
-    athing.description = description 
+    athing.description = title 
     athing.count = count
     return Acommand, topack.seqnum
 

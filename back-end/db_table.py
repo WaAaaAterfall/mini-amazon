@@ -47,8 +47,6 @@ class Order(Base):
     addr_x = Column(Integer)
     addr_y = Column(Integer)
     product_id = Column(Integer, ForeignKey('product.id'))
-    user = Column()
+    ups_account = Column(TEXT, nullable=True)
     #time = Column(TIMESTAMP, default=None, nullable=True)
     product = relationship("Product")
-
-

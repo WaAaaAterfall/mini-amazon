@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class AmazonUser(User):
-    ups_account = models.TextField()
+    ups_account = models.TextField(blank=True)
     def __str__(self):
         return super().get_username()
 
@@ -33,7 +33,7 @@ class Product(models.Model):
 
 
 class Inventory(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     remain_count = models.IntegerField()
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
@@ -52,7 +52,7 @@ class Order(models.Model):
     addr_y = models.IntegerField()
     product = models.ForeignKey(Product, on_delete=models.CASCADE,default=1)
     user = models.ForeignKey(AmazonUser,on_delete=models.CASCADE,default=4)
-    quantity = models.IntegerField(default=1)
+    count = models.IntegerField(default=1)
     ups_account = models.TextField(default='ups_huidan',null=True, blank=True)
 
   

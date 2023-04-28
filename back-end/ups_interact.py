@@ -103,12 +103,17 @@ def handle_UTAOutDelivery(UTAOutDelivery, ups_socket):
     send_ackCommand(out_del_seqnum, ups_socket)
 
     package_id = UTAOutDelivery.packageid
+    new_x = UTAOutDelivery.x
+    new_y = UTAOutDelivery.y
+    print("Receive new address from ups: ", (new_x, new_y))
     session.begin()
     order_to_deliver = session.query(Order).filter(Order.package_id == package_id).first()
     if order_to_deliver is None:
         atu_send_raise_error("Cannot find order to deliver", out_del_seqnum)
     if order_to_deliver.status != 'Delivered':
         order_to_deliver.status = 'OutForDelivery'
+    order_to_deliver.addr_x = new_x
+    order_to_deliver.addr_y = new_y    
     session.commit()
     session.close()
 

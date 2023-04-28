@@ -146,7 +146,7 @@ def place_order(request):
                 product.save()
                 quantity = item.quantity
                 order = Order(addr_x=addr_x, addr_y=addr_y,
-                              product_id=product_id, quantity=quantity, user=request.user.amazonuser, ups_account=request.user.amazonuser.ups_account)
+                              product_id=product_id, count=quantity, user=request.user.amazonuser, ups_account=request.user.amazonuser.ups_account)
                 order.save()
                 item.delete()
                 package_id = order.pk

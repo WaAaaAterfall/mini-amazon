@@ -1,3 +1,11 @@
+SET session_replication_role = replica;
+DELETE FROM product CASCADE;
+DELETE FROM amazon_category CASCADE;
+DELETE FROM amazon_cart CASCADE;
+DELETE FROM Inventory CASCADE;
+DELETE FROM "order";
+DELETE FROM Warehouse CASCADE;
+
 INSERT INTO Product(id,title,description,price,img,sales) VALUES (1,'Vacuum Insulated Tumbler','Stanley Quencher H2.0 FlowState Stainless Steel Vacuum Insulated Tumbler with Lid and Straw for Water, Iced Tea or Coffee, Smoothie and More',45,'/static/img/1.jpg',20);
 INSERT INTO Product(id,title,description,price,img,sales) VALUES (2,'Logitech Pebble Wireless Mouse','Logitech Pebble Wireless Mouse with Bluetooth or 2.4 GHz Receiver, Silent, Slim Computer Mouse with Quiet Clicks, for Laptop/Notebook/iPad/PC/Mac/Chromebook - Pink Rose',23.99,'/static/img/2.jpg',40);
 INSERT INTO Product(id,title,description,price,img,sales) VALUES (3,'OMOTON Tablet Stand','OMOTON Tablet Stand Holder Adjustable, T1 Desktop Aluminum Tablet Dock Cradle Compatible with iPad Air/Mini, iPad 10.2/9.7, iPad Pro 11/12.9, Samsung Tab and More, Rose Gold',15.99,'/static/img/3.jpg',22);
