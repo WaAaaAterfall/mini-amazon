@@ -27,11 +27,13 @@ def multiply(value, arg):
 def send_signal(o_id):
     print("*****")
     print(o_id)
-    HOST = "127.0.0.1"  # "127.0.0.1"  # The server's hostname or IP address
+    o_id = str(o_id)
+    HOST = "0.0.0.0"  # "127.0.0.1"  # The server's hostname or IP address
     PORT = 13145
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((HOST, PORT))
-        s.sendall(o_id.encode())
+        s.sendall(o_id.encode('utf8'))
+        print(len(o_id.encode('utf8')))
         s.close()
 
 

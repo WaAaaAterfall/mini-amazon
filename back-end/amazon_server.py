@@ -71,8 +71,8 @@ def connect_ups_world_web(atu_socket, ups_address):
     amazon_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     amazon_address = ('0.0.0.0', 13145)
     print("Connect to front-end, create a thread to receive sent_order")
-    web_socket = accept_web(amazon_socket, amazon_address)
-    thread_handle_web = threading.Thread(target = receive_order, args =(web_socket,))
+    # web_socket = accept_web(amazon_socket, amazon_address)
+    thread_handle_web = threading.Thread(target = receive_order, args =(amazon_socket, amazon_address,))
     thread_handle_web.start()
 
     thread_handle_web.join()
@@ -158,13 +158,16 @@ def process_order(package_id):
     session.close()
     
 
-def receive_order(web_fd):
+def receive_order(amazon_socket, amazon_address):
+    amazon_socket.bind(amazon_address)
+    amazon_socket.listen(100)
     while(True):
-        msg = web_fd.recv(1)
+        web_fd, addr = amazon_socket.accept()
+        msg = web_fd.recv(4)
         #package_id = msg.decode()
         if msg.decode('utf8') == '':
             continue
-        package_id = int(msg.decode('utf8'))
+        package_id = int(msg.decode('utf8'))    
         if not msg:
             continue
         print("Received from web, starting processing sent_order", package_id)
