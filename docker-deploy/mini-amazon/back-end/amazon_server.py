@@ -2,9 +2,9 @@ from ups_interact import *
 from world_interact import *
 from web_interact import *
 
-UPS_HOSTNAME = 'vcm-30458.vm.duke.edu'
+UPS_HOSTNAME = 'vcm-32421.vm.duke.edu'
 UPS_PORTNUM = 32345
-WORLD_HOSTNAME = 'vcm-30458.vm.duke.edu'
+WORLD_HOSTNAME = 'vcm-32421.vm.duke.edu'
 WORLD_PORTNUM = 23456
 
 def define_warehouse():

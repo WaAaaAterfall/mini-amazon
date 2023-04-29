@@ -17,8 +17,10 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path,include
+from amazon import views as amazon_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('amazon/',include('amazon.urls'))
+    path('amazon/',include('amazon.urls')),
+    path('',amazon_views.home,name='home')
 ]

@@ -1,0 +1,25 @@
+1. Receiving Length from web 
+Initially, we sent the order ID directly to the backend, but we found that the send function could only send bytes. So, we converted the order ID to a string, encoded it, and sent it to the backend. However, during receiving, we assumed that we could receive one byte by using recv(1). But when the order number increased to two digits, we still could only receive one byte. Later, we found that the received byte length was related to the string length.
+To solve this problem, We changed the receiver to a bigger buffer.
+
+2. Looping to accept or receive socket connection from web
+At the beginning, we adopted the approach of looping to receive messages from the web after accepting a socket connection from it once. However, this method had two major problems. 1. It was difficult for the backend to maintain a global socket while also making it challenging to define it in the view.py of Django. 2. It also caused corresponding sticky packet issues.
+We subsequently adopted the approach of looping to accept socket connections from the web and closing the socket after sending the order number once an order is placed and completed.
+
+3. Everytime the system restart, the database will be flushed and all data will be cleaned. However, we need to add the data for product and category in advance into the database, otherwise the database will raise ralation does not exists error. 
+We used `python manage.py dumpdata > data.json` to export data and used js2sql to convert the data into SQL statements and insert them into the back-end for execution.
+
+4. The world cannot take too many commands at the same time. If I use a for loop to send the messages again and again without any pause, the world will not be able to handle all the commands and send strange messages to amazon.
+After some tests, we found that the world can only take two messages in a sequence without raising any error.
+To solve this, we add several time.sleep() in between sending the messages.
+
+5. Sometime when the simspeed of the world is slow, amazon cannot send messages and receive the response for world in time. So ups will continuously wait for the ack message from amazon and sometimes will block sending other messages. As a consequence, the UTAOutForDelivery and UTADeliverred may arrive at amazon server in wrong order, and may mess up the database where records the status of the order. 
+To solve this, we add a if statement in the UTAOutForDelivery handling funciton, indicating that if the current status of the order is alreddy "Delivered", the databae will no longer change the order status to "Out for delivery"
+
+6. To increase the server efficiency and avoid blocking, we create one thread per order to handle them, rather than using one thread to sequentially handle all the orders.  
+
+7. We use global lock to ensure that the seqnum will only be assigned once to a message, so that the sequence number for each message is unique. When creating and handling the messages in parallel, it is possible to incur race condition and may mess up with the increment of global "seqnum"
+
+8. Move the create message out from the handling module to tidy up the code 
+
+9. Add a hashset to record all the messages we've handled from ups and world, in case to aviod any multiple handling on any message and subsequent errors
